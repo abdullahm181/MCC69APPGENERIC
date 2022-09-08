@@ -36,12 +36,9 @@ namespace API
             services.AddScoped<JobsRepository>();
             services.AddScoped<EmployeesRepository>();
             services.AddScoped<JobHistoryRepository>();
-<<<<<<< HEAD
             services.AddScoped<UserRepository>();
             services.AddScoped<RoleRepository>();
             services.AddScoped<UserRoleRepository>();
-=======
->>>>>>> 97508de2f7342ea05654553cad75eef18e99ab85
             services.AddControllers();
             services.AddSwaggerGen();
         }
