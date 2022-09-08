@@ -45,19 +45,18 @@ namespace API.Controllers
            
         }
 
-        [HttpPut("Change/{id}")]
-        public IActionResult Update(int id, [FromBody] User user)
+        [HttpPut(" ChangePassword")]
+        public IActionResult ChangePassword([FromBody] User user)
         {
             if (ModelState.IsValid)
             {
-                user.Id = id;
-                var result = userRepository.Update(user);
+                var result = userRepository.ChangePassword(user);
                 if (result > 0)
                     return Ok(new { result = 200, message = "successfully Updated" });
                 else if (result == -1)
                     return NotFound();
-                else if (result == -2)
-                    return BadRequest(new { result = 400, message = "UserName sudah digunakan" });
+                /*else if (result == -2)
+                    return BadRequest(new { result = 400, message = "UserName sudah digunakan" });*/
             }
             return BadRequest();
         }

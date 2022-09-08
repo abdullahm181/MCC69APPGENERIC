@@ -46,14 +46,25 @@ namespace API.Repositories.Data
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;*/
 
-            myContext.User.Add(user);
-            var result = myContext.SaveChanges();
+            
+            var result = Post(user);
 
+            return result;
+        }
+        public int ChangePassword(User userParam) {
+            var user = myContext.User.SingleOrDefault(x => x.UserName == userParam.UserName);
+            if (user == null)
+                return -1;
+            if (!string.IsNullOrWhiteSpace(userParam.Password) && userParam.Password != user.Password)
+            {
+                user.Password = userParam.Password;
+            }
+            var result = myContext.SaveChanges();
             return result;
         }
         public int Update(User userParam)
         {
-            var user = myContext.User.Find(userParam.Id);
+            var user = Get(userParam.Id);
 
             if (user == null)
                 return -1;
