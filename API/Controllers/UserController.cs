@@ -34,16 +34,18 @@ namespace API.Controllers
             var result = userRepository.Login(user.UserName, user.Password);
             if (result == null)
                 return BadRequest(new { message = "Username or password is incorrect" });
-
+            var userRole = userRepository.GetRoleById(result.Id);
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenKey = Encoding.UTF8.GetBytes(iconfiguration["JWT:Key"]);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new Claim[]
-              {
-             new Claim(ClaimTypes.Name, user.UserName)
-              }),
-                Expires = DateTime.UtcNow.AddMinutes(10),
+                Subject = new ClaimsIdentity(new[]
+                {
+                    //new Claim(ClaimTypes.Email, user.Employees.Email),
+                    new Claim(ClaimTypes.Name, user.UserName),
+                    //new Claim(ClaimTypes.Role, userRole.Role.Name)
+                }),
+                Expires = DateTime.UtcNow.AddMinutes(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
@@ -54,7 +56,8 @@ namespace API.Controllers
                 UserName = result.UserName,
                 FirstName = result.Employees.FirstName,
                 LastName = result.Employees.LastName,
-                Email=result.Employees.Email,
+                Email = result.Employees.Email,
+                Role = userRole.Role.Name,
                 Token=tokenString
             };
             return Ok(new { result = 200, message = "successfully Login", data=data });

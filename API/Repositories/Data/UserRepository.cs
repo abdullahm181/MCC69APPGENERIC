@@ -103,6 +103,13 @@ namespace API.Repositories.Data
             return result;
 
         }
+        public UserRole GetRoleById(int UserId)
+        {
+            var user = myContext.UserRole.FirstOrDefault(x => x.User_Id == UserId);
+            
+            return user;
+
+        }
 
     }
   
