@@ -1,22 +1,31 @@
 ﻿using API.Models;
 using API.Repositories.Data;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace API.Controllers
 {
+    [Authorize]
     public class UserController : Controller<User, UserRepository>
     {
         UserRepository userRepository;
-        public UserController(UserRepository userRepository):base(userRepository)
+        private readonly IConfiguration iconfiguration;
+        public UserController(UserRepository userRepository, IConfiguration iconfiguration) :base(userRepository)
         {
             this.userRepository = userRepository;
+            this.iconfiguration = iconfiguration;
         }
-        //[AllowAnonymous]
+        [AllowAnonymous]
         [HttpPost("Login")]
         public IActionResult Login(User user)
         {
@@ -25,8 +34,32 @@ namespace API.Controllers
             var result = userRepository.Login(user.UserName, user.Password);
             if (result == null)
                 return BadRequest(new { message = "Username or password is incorrect" });
-            return Ok(new { result = 200, message = "successfully Login" });
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenKey = Encoding.UTF8.GetBytes(iconfiguration["JWT:Key"]);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+              {
+             new Claim(ClaimTypes.Name, user.UserName)
+              }),
+                Expires = DateTime.UtcNow.AddMinutes(10),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
+            var data = new
+            {
+                Id = result.Id,
+                UserName = result.UserName,
+                FirstName = result.Employees.FirstName,
+                LastName = result.Employees.LastName,
+                Email=result.Employees.Email,
+                Token=tokenString
+            };
+            return Ok(new { result = 200, message = "successfully Login", data=data });
         }
+        [AllowAnonymous]
         [HttpPost("register")]
         public IActionResult Register([FromBody] User user)
         {
