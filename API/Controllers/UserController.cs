@@ -45,7 +45,7 @@ namespace API.Controllers
             return Ok(new { result = 200, message = "successfully Login", Token=tokenString});
         }
         [AllowAnonymous]
-        [HttpPost("register")]
+        [HttpPost("Register")]
         public IActionResult Register([FromBody] User user)
         {
             if (!string.IsNullOrWhiteSpace(user.UserName) && !string.IsNullOrWhiteSpace(user.Password)) {
@@ -61,7 +61,7 @@ namespace API.Controllers
             return BadRequest();
         }
 
-        [HttpPost("GetName")]
+        [HttpGet("GetName")]
         public IActionResult GetName()
         {
             var result = HttpContext.User.FindFirst(ClaimTypes.Name)?.Value;
@@ -69,7 +69,7 @@ namespace API.Controllers
                 return BadRequest();
             return Ok(new { result = 200, data = result });
         }
-        [HttpPost("GetId")]
+        [HttpGet("GetId")]
         public IActionResult GetId()
         {
             var result = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -77,7 +77,7 @@ namespace API.Controllers
                 return BadRequest();
             return Ok(new { result = 200, data = result });
         }
-        [HttpPost("GetEmial")]
+        [HttpGet("GetEmail")]
         public IActionResult GetEmail()
         {
             var result = HttpContext.User.FindFirst(ClaimTypes.Email)?.Value;
@@ -85,7 +85,7 @@ namespace API.Controllers
                 return BadRequest();
             return Ok(new { result = 200, data = result });
         }
-        [HttpPost("GetRole")]
+        [HttpGet("GetRole")]
         public IActionResult GetRole()
         {
             var result = HttpContext.User.FindFirst(ClaimTypes.Role)?.Value;
@@ -94,7 +94,7 @@ namespace API.Controllers
             return Ok(new { result = 200, data = result });
         }
 
-        [HttpPut(" ChangePassword")]
+        [HttpPut("ChangePassword")]
         public IActionResult ChangePassword([FromBody] User user)
         {
             if (ModelState.IsValid)
