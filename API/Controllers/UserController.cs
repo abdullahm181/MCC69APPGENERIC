@@ -1,4 +1,5 @@
-﻿using API.Models;
+﻿using API.Middleware;
+using API.Models;
 using API.Repositories.Data;
 
 using Microsoft.AspNetCore.Authorization;
@@ -35,32 +36,13 @@ namespace API.Controllers
             if (result == null)
                 return BadRequest(new { message = "Username or password is incorrect" });
             var userRole = userRepository.GetRoleById(result.Id);
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var tokenKey = Encoding.UTF8.GetBytes(iconfiguration["JWT:Key"]);
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    //new Claim(ClaimTypes.Email, user.Employees.Email),
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    //new Claim(ClaimTypes.Role, userRole.Role.Name)
-                }),
-                Expires = DateTime.UtcNow.AddMinutes(1),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature)
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var tokenString = tokenHandler.WriteToken(token);
-            var data = new
-            {
-                Id = result.Id,
-                UserName = result.UserName,
-                FirstName = result.Employees.FirstName,
-                LastName = result.Employees.LastName,
-                Email = result.Employees.Email,
-                Role = userRole.Role.Name,
-                Token=tokenString
-            };
-            return Ok(new { result = 200, message = "successfully Login", data=data });
+            var jwt = new JwtService(iconfiguration);
+            var tokenString = jwt.GenerateSecurityToken(
+                result.Id, result.Employees.Email, 
+                result.Employees.FirstName + " " + result.Employees.LastName, 
+                userRole.Role.Name);
+           
+            return Ok(new { result = 200, message = "successfully Login", Token=tokenString});
         }
         [AllowAnonymous]
         [HttpPost("register")]
@@ -76,9 +58,40 @@ namespace API.Controllers
                         return BadRequest(new { result = 400, message = "UserName sudah digunakan" });
                 }
             }
-            return BadRequest();  
+            return BadRequest();
+        }
 
-           
+        [HttpPost("GetName")]
+        public IActionResult GetName()
+        {
+            var result = HttpContext.User.FindFirst(ClaimTypes.Name)?.Value;
+            if (result == null)
+                return BadRequest();
+            return Ok(new { result = 200, data = result });
+        }
+        [HttpPost("GetId")]
+        public IActionResult GetId()
+        {
+            var result = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (result == null)
+                return BadRequest();
+            return Ok(new { result = 200, data = result });
+        }
+        [HttpPost("GetEmial")]
+        public IActionResult GetEmail()
+        {
+            var result = HttpContext.User.FindFirst(ClaimTypes.Email)?.Value;
+            if (result == null)
+                return BadRequest();
+            return Ok(new { result = 200, data = result });
+        }
+        [HttpPost("GetRole")]
+        public IActionResult GetRole()
+        {
+            var result = HttpContext.User.FindFirst(ClaimTypes.Role)?.Value;
+            if (result == null)
+                return BadRequest();
+            return Ok(new { result = 200, data = result });
         }
 
         [HttpPut(" ChangePassword")]
