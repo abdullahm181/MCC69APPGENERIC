@@ -43,6 +43,7 @@ namespace API
             services.AddScoped<UserRepository>();
             services.AddScoped<RoleRepository>();
             services.AddScoped<UserRoleRepository>();
+            services.AddScoped<AccountRepository>();
             services.AddControllers();
             services.AddAuthentication(x =>
             {

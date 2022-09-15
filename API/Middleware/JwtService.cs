@@ -29,27 +29,13 @@ namespace API.Middleware
                     new Claim(ClaimTypes.Name, FullName),
                     new Claim(ClaimTypes.Role, Role)
                 }),
-                Expires = DateTime.UtcNow.AddMinutes(1),
+                Expires = DateTime.UtcNow.AddMinutes(5),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
 
-        public string GetName(string token)
-        {
-            string secret = "This is my supper secret key for jwt";
-            var key = Encoding.ASCII.GetBytes(secret);
-            var handler = new JwtSecurityTokenHandler();
-            var validations = new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(key),
-                ValidateIssuer = false,
-                ValidateAudience = false
-            };
-            var claims = handler.ValidateToken(token, validations, out var tokenSecure);
-            return claims.Identity.Name;
-        }
+        
     }
 }
