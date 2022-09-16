@@ -4,60 +4,57 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using Newtonsoft.Json;
+using MCC69APP.ViewModel;
+using Newtonsoft.Json.Linq;
 
 namespace MCC69APP.Controllers
 {
     public class RegionsController : Controller
     {
-        MyContext myContext;
-        public RegionsController(MyContext myContext)
-        {
-            this.myContext = myContext;
-        }
+        // GET ALL
+        string Baseurl = "https://localhost:5001/api/";
         public IActionResult Index()
         {
-            var regions = myContext.Regions.ToList();
-            return View(regions);
-        }
-        //CREATE
-        //getview
-        public IActionResult Create() 
-        {
-            
-            return View();
-        }
-        //post
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Create(Regions region)
-        {
-            myContext.Regions.Add(region);
-            var result = myContext.SaveChanges();
-            if (result > 0)
-                return RedirectToAction("Index", "Regions");
-            return View();
-        }
-        //Insert
+            IEnumerable<Regions> regions = null;
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(Baseurl);
+                //HTTP GET
+                var responseTask = client.GetAsync("Regions");
+                responseTask.Wait();
 
-        //EDIT
-        public IActionResult Edit(int id)
-        {
-            var data = myContext.Regions.Find(id);//harus primarykey
-            //var data1 = myContext.Regions.SingleOrDefault(x => x.Id.Equals(id));//whre
-            return View(data);
+                var result = responseTask.Result;
+                if (result.IsSuccessStatusCode)
+                {
+                    // Get the response
+                    var ResultJsonString = result.Content.ReadAsStringAsync();
+                    ResultJsonString.Wait();
+                    JObject rss = JObject.Parse(ResultJsonString.Result);
+                    JArray data = (JArray)rss["data"];
+                    regions = JsonConvert.DeserializeObject<List<Regions>>(JsonConvert.SerializeObject(data));
+                    //RootObject<Regions> ro = JsonConvert.DeserializeObject<RootObject<Regions>>(ResultJsonString.Result);
+                   // regions = ro.Data;
+                }
+                else //web api sent error response 
+                {
+                    //log response status here..
+
+                    regions = Enumerable.Empty<Regions>();
+
+                    ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+                }
+            }
+            return View(regions);
+            
         }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Edit(Regions regions) 
-        {
-            myContext.Entry(regions).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-            var result = myContext.SaveChanges();
-            if (result > 0)
-                return RedirectToAction("Index", "Regions");
-            return View();
-        }
-        //Detail
+        // GET By ID
+
         public IActionResult Details(int? id)
         {
             if (id == null)
@@ -65,33 +62,166 @@ namespace MCC69APP.Controllers
                 return NotFound();
             }
 
-            var data = myContext.Regions.FirstOrDefault(m => m.Id == id);
-               
-            if (data == null)
+            Regions regions = null;
+            using (var client = new HttpClient())
             {
-                return NotFound();
-            }
+                client.BaseAddress = new Uri(Baseurl);
+                //HTTP GET
+                var responseTask = client.GetAsync("Regions/" + id.ToString());
+                responseTask.Wait();
 
-            return View(data);
+                var result = responseTask.Result;
+                if (result.IsSuccessStatusCode)
+                {
+                    // Get the response
+                    var ResultJsonString = result.Content.ReadAsStringAsync();
+                    ResultJsonString.Wait();
+                    JObject rss = JObject.Parse(ResultJsonString.Result);
+                    JObject data = (JObject)rss["data"];
+                    regions = JsonConvert.DeserializeObject<Regions>(JsonConvert.SerializeObject(data));
+                }
+                else //web api sent error response 
+                {
+                   
+                    ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+                }
+            }
+            return View(regions);
+
+
         }
 
-        //DELETE
-        public IActionResult Delete(int id)
+        public IActionResult Edit(int id)
         {
-            var data = myContext.Regions.Find(id);
-            
-            return View(data);
+            Regions regions = null;
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(Baseurl);
+                //HTTP GET
+                var responseTask = client.GetAsync("Regions/"+ id.ToString());
+                responseTask.Wait();
+
+                var result = responseTask.Result;
+                if (result.IsSuccessStatusCode)
+                {
+                    // Get the response
+                    var ResultJsonString = result.Content.ReadAsStringAsync();
+                    ResultJsonString.Wait();
+                    JObject rss = JObject.Parse(ResultJsonString.Result);
+                    JObject data = (JObject)rss["data"];
+                    regions = JsonConvert.DeserializeObject<Regions>(JsonConvert.SerializeObject(data));
+                }
+                else //web api sent error response 
+                {
+
+                    ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+                }
+            }
+            return View(regions);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Delete(Regions regions)
+        public IActionResult Edit(Regions regions)
         {
-            var data = myContext.Regions.Find(regions.Id);
-            myContext.Regions.Remove(data);
-            var result = myContext.SaveChanges();
-            if (result > 0)
-                return RedirectToAction("Index", "Regions");
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(Baseurl+"Regions/"+ regions.Id.ToString());
+
+                //HTTP POST
+                var putTask = client.PutAsJsonAsync<Regions>(client.BaseAddress ,regions);
+                putTask.Wait();
+
+                var result = putTask.Result;
+                if (result.IsSuccessStatusCode)
+                {
+
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            return View(regions);
+        }
+        // POST
+        public IActionResult Create()
+        {
             return View();
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create(Regions regions)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(Baseurl+"Regions");
+
+                //HTTP POST
+                var postTask = client.PostAsJsonAsync<Regions>("Regions", regions);
+                postTask.Wait();
+
+                var result = postTask.Result;
+                if (result.IsSuccessStatusCode)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+
+            ModelState.AddModelError(string.Empty, "Server Error. Please contact administrator.");
+
+            return View(regions);
+        }
+        // PUT
+        // DELETE
+        //DELETE
+        public IActionResult Delete(int id)
+        {
+            Regions regions = null;
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(Baseurl);
+                //HTTP GET
+                var responseTask = client.GetAsync("Regions/" + id.ToString());
+                responseTask.Wait();
+
+                var result = responseTask.Result;
+                if (result.IsSuccessStatusCode)
+                {
+                    // Get the response
+                    var ResultJsonString = result.Content.ReadAsStringAsync();
+                    ResultJsonString.Wait();
+                    JObject rss = JObject.Parse(ResultJsonString.Result);
+                    JObject data = (JObject)rss["data"];
+                    regions = JsonConvert.DeserializeObject<Regions>(JsonConvert.SerializeObject(data));
+                }
+                else //web api sent error response 
+                {
+
+                    ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+                }
+            }
+            return View(regions);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Delete(Countries countries)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(Baseurl);
+
+                //HTTP DELETE
+                var deleteTask = client.DeleteAsync("Regions/" + countries.Id.ToString());
+                deleteTask.Wait();
+
+                var result = deleteTask.Result;
+                if (result.IsSuccessStatusCode)
+                {
+
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+       
+
     }
 }

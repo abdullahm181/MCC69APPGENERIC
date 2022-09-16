@@ -10,16 +10,16 @@ using System.Threading.Tasks;
 
 namespace MCC69APP.Controllers
 {
-    public class JobHistoriesController : Controller
+    public class JobHistoryController : Controller
     {
         MyContext myContext;
-        public JobHistoriesController(MyContext myContext)
+        public JobHistoryController(MyContext myContext)
         {
             this.myContext = myContext;
         }
         public IActionResult Index()
         {
-            var data = myContext.JobHistories.Include(j => j.Departments).Include(j => j.Jobs).Include(j => j.Employees).ToList();
+            var data = myContext.JobHistory.Include(j => j.Departments).Include(j => j.Jobs).Include(j => j.Employees).ToList();
             return View(data);
         }
         public IActionResult Details(int? id)
@@ -28,7 +28,7 @@ namespace MCC69APP.Controllers
             {
                 return NotFound();
             }
-            var data=myContext.JobHistories.Include(j => j.Departments)
+            var data=myContext.JobHistory.Include(j => j.Departments)
                 .Include(j => j.Employees)
                 .Include(j => j.Jobs)
                 .FirstOrDefault(m => m.Id == id);
@@ -50,7 +50,7 @@ namespace MCC69APP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create([Bind("Id,StartDate,EndDate,Job_Id,Department_Id")] JobHistories jobHistories)
+        public IActionResult Create([Bind("Id,StartDate,EndDate,Job_Id,Department_Id")] JobHistory jobHistories)
         {
             if (ModelState.IsValid)
             {
@@ -71,7 +71,7 @@ namespace MCC69APP.Controllers
                 return NotFound();
             }
             
-            var data = myContext.JobHistories.Find(id);
+            var data = myContext.JobHistory.Find(id);
             if (data == null)
             {
                 return NotFound();
@@ -84,7 +84,7 @@ namespace MCC69APP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, [Bind("Id,StartDate,EndDate,Job_Id,Department_Id")] JobHistories jobHistories)
+        public IActionResult Edit(int id, [Bind("Id,StartDate,EndDate,Job_Id,Department_Id")] JobHistory jobHistories)
         {
             if (id != jobHistories.Id)
             {
@@ -102,7 +102,7 @@ namespace MCC69APP.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!JobHistoriesExists(jobHistories.Id))
+                    if (!JobHistoryExists(jobHistories.Id))
                     {
                         return NotFound();
                     }
@@ -125,7 +125,7 @@ namespace MCC69APP.Controllers
                 return NotFound();
             }
 
-            var data = myContext.JobHistories
+            var data = myContext.JobHistory
                 .Include(j => j.Departments)
                 .Include(j => j.Employees)
                 .Include(j => j.Jobs)
@@ -142,16 +142,16 @@ namespace MCC69APP.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
         {
-            var data = myContext.JobHistories.Find(id);
-            myContext.JobHistories.Remove(data);
+            var data = myContext.JobHistory.Find(id);
+            myContext.JobHistory.Remove(data);
             var result = myContext.SaveChanges();
             if (result > 0)
                 return RedirectToAction(nameof(Index));
             return View();
         }
-        private bool JobHistoriesExists(int id)
+        private bool JobHistoryExists(int id)
         {
-            return myContext.JobHistories.Any(e => e.Id == id);
+            return myContext.JobHistory.Any(e => e.Id == id);
         }
     }
 }

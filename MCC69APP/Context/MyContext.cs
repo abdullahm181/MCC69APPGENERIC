@@ -19,6 +19,6 @@ namespace MCC69APP.Context
         public DbSet<Locations> Locations { get; set; }
         public DbSet<Employees> Employees { get; set; }
         public DbSet<Jobs> Jobs { get; set; }
-        public DbSet<JobHistories> JobHistories { get; set; }
+        public DbSet<JobHistory> JobHistory { get; set; }
     }
 }

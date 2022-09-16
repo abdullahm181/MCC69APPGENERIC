@@ -1,4 +1,7 @@
-﻿using System;
+﻿
+
+using MCC69APP.Repositories.Interface;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -7,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace MCC69APP.Models
 {
-    public class Employees
+    public class Employees : IEntity
     {
         [Key]
         public int Id { get; set; }
@@ -17,14 +20,17 @@ namespace MCC69APP.Models
         public string PhoneNumber { get; set; }
         public DateTime HireDate { get; set; }
         public int Salary { get; set; }
-        public Jobs Jobs { get; set; }
-        
+        public virtual Jobs Jobs { get; set; }
+
         [ForeignKey("Jobs")]
         public int Job_Id { get; set; }
-        public Employees Manager { get; set; }
+        
+        public virtual Employees Manager { get; set; }
+        #nullable enable
         [ForeignKey("Manager")]
         public int? Manager_Id { get; set; }
-        public Departments Departments{ get; set; }
+        #nullable disable
+        public virtual Departments Departments { get; set; }
         [ForeignKey("Departments")]
         public int Department_Id { get; set; }
     }

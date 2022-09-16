@@ -1,5 +1,4 @@
 ﻿
-
 using MCC69APP.Repositories.Interface;
 using System;
 using System.Collections.Generic;
@@ -10,14 +9,18 @@ using System.Threading.Tasks;
 
 namespace MCC69APP.Models
 {
-    public class Countries : IEntity
+    public class User : IEntity
     {
+        public virtual Employees Employees { get; set; }
+
+        
         [Key]
+        [ForeignKey("Employees")]
         public int Id { get; set; }
+
         [Required]
-        public string Name { get; set; }
-        public virtual Regions Regions { get; set; }
-        [ForeignKey("Regions")]
-        public int Region_Id { get; set; }
+        public string UserName { get; set; }
+        [Required]
+        public string Password { get; set; }
     }
 }

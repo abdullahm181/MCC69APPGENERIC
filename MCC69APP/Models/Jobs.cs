@@ -1,4 +1,6 @@
-﻿using System;
+﻿
+using MCC69APP.Repositories.Interface;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -6,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MCC69APP.Models
 {
-    public class Jobs
+    public class Jobs : IEntity
     {
         [Key]
         public int Id { get; set; }

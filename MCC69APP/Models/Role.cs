@@ -1,5 +1,4 @@
 ﻿
-
 using MCC69APP.Repositories.Interface;
 using System;
 using System.Collections.Generic;
@@ -10,14 +9,17 @@ using System.Threading.Tasks;
 
 namespace MCC69APP.Models
 {
-    public class Countries : IEntity
+    public class Role : IEntity
     {
         [Key]
         public int Id { get; set; }
-        [Required]
         public string Name { get; set; }
-        public virtual Regions Regions { get; set; }
-        [ForeignKey("Regions")]
-        public int Region_Id { get; set; }
+
+        [ForeignKey("LevelId")]
+        public virtual Level Level { get; set; }
+        public int LevelId { get; set; }
+
+        public virtual List<User> Users { get; set; }
+
     }
 }
