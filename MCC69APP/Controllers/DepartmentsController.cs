@@ -12,15 +12,23 @@ namespace MCC69APP.Controllers
 {
     public class DepartmentsController : Controller
     {
-        MyContext myContext;
+        HttpAPi<Departments> httpAPI;
+        HttpAPi<Locations> httpAPILocations;
         public DepartmentsController(MyContext myContext)
         {
-            this.myContext = myContext;
+            this.httpAPI = new HttpAPi<Departments>("Departments");
+            this.httpAPILocations = new HttpAPi<Locations>("Locations");
         }
         public IActionResult Index()
         {
-            var data = myContext.Departments.Include(d => d.Locations).ToList();
-            return View(data);
+
+            var departments = httpAPI.Get().ToList();
+
+            if (departments == Enumerable.Empty<Countries>())
+            {
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+            }
+            return View(departments);
         }
         public IActionResult Details(int? id)
         {
@@ -28,19 +36,21 @@ namespace MCC69APP.Controllers
             {
                 return NotFound();
             }
-            var data = myContext.Departments.Include(d => d.Locations).FirstOrDefault(m => m.Id == id);
-            if (data == null)
+
+
+            var departments = httpAPI.Get(id);
+            if (departments == null)
             {
-                return NotFound();
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
             }
 
-            return View(data);
+            return View(departments);
         }
         public IActionResult Create()
         {
-
-            ViewBag.Locations = new SelectList(myContext.Locations.ToList(), "Id", "StreetAddress");
-            ViewData["Manager_Id"] = new SelectList(myContext.Employees.ToList(), "Id", "Id");
+            
+            ViewBag.Locations = new SelectList(httpAPILocations.Get().ToList(), "Id", "StreetAddress");
+            
             return View();
         }
 
@@ -49,15 +59,12 @@ namespace MCC69APP.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create([Bind("Id,Name,Manager_Id,Location_Id")] Departments departments)
         {
-            if (ModelState.IsValid)
+            string result = httpAPI.Create(departments);
+            if (!string.IsNullOrWhiteSpace(result) && result == "200")
             {
-                myContext.Departments.Add(departments);
-                var result = myContext.SaveChanges();
-                if (result > 0)
-                    return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index));
             }
-            ViewData["Location_Id"] = new SelectList(myContext.Locations, "Id", "StreetAddress", departments.Location_Id);
-            
+
             return View(departments);
         }
         public IActionResult Edit(int? id)
@@ -67,50 +74,26 @@ namespace MCC69APP.Controllers
                 return NotFound();
             }
 
-            var departments = myContext.Departments.Find(id);
+
+            var departments = httpAPI.Get(id);
             if (departments == null)
             {
-                return NotFound();
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
             }
-            ViewData["Location_Id"] = new SelectList(myContext.Locations, "Id", "StreetAddress", departments.Location_Id);
-            
-            return View(departments);
+            ViewBag.Location_Id= new SelectList(httpAPILocations.Get().ToList(), "Id", "StreetAddress", departments.Location_Id);
+            return View(departments); ;
         }
 
         
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, [Bind("Id,Name,Manager_Id,Location_Id")] Departments departments)
+        public IActionResult Edit([Bind("Id,Name,Manager_Id,Location_Id")] Departments departments)
         {
-            if (id != departments.Id)
+            string result = httpAPI.Edit(departments);
+            if (!string.IsNullOrWhiteSpace(result) && result == "200")
             {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    myContext.Departments.Update(departments);
-                    var result = myContext.SaveChanges();
-                    if (result > 0)
-                        return RedirectToAction(nameof(Index));
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!DepartmentsExists(departments.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Location_Id"] = new SelectList(myContext.Locations, "Id", "StreetAddress", departments.Location_Id);
-            
             return View(departments);
         }
         public IActionResult Delete(int? id)
@@ -119,32 +102,30 @@ namespace MCC69APP.Controllers
             {
                 return NotFound();
             }
-            
-            var data = myContext.Departments.Include(d => d.Locations).FirstOrDefault(m => m.Id == id);
-            
-            if (data == null)
+
+
+            var departments = httpAPI.Get(id);
+            if (departments == null)
             {
-                return NotFound();
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
             }
 
-            return View(data);
+            return View(departments); ;
         }
 
         // POST: Departments/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(int id)
+        public IActionResult Delete(Departments departments)
         {
-            var data = myContext.Departments.Find(id);
-            myContext.Departments.Remove(data);
-            var result = myContext.SaveChanges();
-            if (result > 0)
+            string result = httpAPI.Delete(departments);
+            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            {
                 return RedirectToAction(nameof(Index));
-            return View();
+            }
+
+            return View(departments);
         }
-        private bool DepartmentsExists(int id)
-        {
-            return myContext.Departments.Any(e => e.Id == id);
-        }
+        
     }
 }

@@ -12,14 +12,20 @@ namespace MCC69APP.Controllers
 {
     public class JobsController : Controller
     {
-        MyContext myContext;
+        HttpAPi<Jobs> httpAPI;
         public JobsController(MyContext myContext)
         {
-            this.myContext = myContext;
+            this.httpAPI = new HttpAPi<Jobs>("Jobs");
         }
         public IActionResult Index()
         {
-            return View(myContext.Jobs.ToList());
+            var jobs = httpAPI.Get().ToList();
+
+            if (jobs == Enumerable.Empty<Countries>())
+            {
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+            }
+            return View(jobs);
         }
         public IActionResult Details(int? id)
         {
@@ -27,13 +33,15 @@ namespace MCC69APP.Controllers
             {
                 return NotFound();
             }
-            var data = myContext.Jobs.FirstOrDefault(m => m.Id == id);
-            if (data == null)
+
+
+            var jobs = httpAPI.Get(id);
+            if (jobs == null)
             {
-                return NotFound();
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
             }
 
-            return View(data);
+            return View(jobs);
         }
         public IActionResult Create()
         {
@@ -45,13 +53,12 @@ namespace MCC69APP.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create([Bind("Id,JobTitle,MinSalary,MaxSalary")] Jobs jobs)
         {
-            if (ModelState.IsValid)
+            string result = httpAPI.Create(jobs);
+            if (!string.IsNullOrWhiteSpace(result) && result == "200")
             {
-                myContext.Jobs.Add(jobs);
-                var result = myContext.SaveChanges();
-                if (result > 0)
-                    return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index));
             }
+
             return View(jobs);
         }
 
@@ -62,42 +69,22 @@ namespace MCC69APP.Controllers
                 return NotFound();
             }
 
-            var data =myContext.Jobs.Find(id);
-            if (data == null)
+
+            var jobs = httpAPI.Get(id);
+            if (jobs == null)
             {
-                return NotFound();
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
             }
-            return View(data);
+
+            return View(jobs);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, [Bind("Id,JobTitle,MinSalary,MaxSalary")] Jobs jobs)
+        public IActionResult Edit([Bind("Id,JobTitle,MinSalary,MaxSalary")] Jobs jobs)
         {
-            if (id != jobs.Id)
+            string result = httpAPI.Edit(jobs);
+            if (!string.IsNullOrWhiteSpace(result) && result == "200")
             {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    myContext.Entry(jobs).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                    var result = myContext.SaveChanges();
-                    if (result > 0)
-                        return RedirectToAction(nameof(Index));
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!JobsExists(jobs.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
                 return RedirectToAction(nameof(Index));
             }
             return View(jobs);
@@ -108,31 +95,31 @@ namespace MCC69APP.Controllers
             {
                 return NotFound();
             }
-            var data = myContext.Jobs.FirstOrDefault(m => m.Id == id);  
-            if (data == null)
+
+
+            var jobs = httpAPI.Get(id);
+            if (jobs == null)
             {
-                return NotFound();
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
             }
 
-            return View(data);
+            return View(jobs);
         }
 
         // POST: Jobs/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(int id)
+        public IActionResult Delete(Jobs jobs)
         {
-            var jobs =myContext.Jobs.Find(id);
-            myContext.Jobs.Remove(jobs);
-            var result = myContext.SaveChanges();
-            if (result > 0)
+            string result = httpAPI.Delete(jobs);
+            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            {
                 return RedirectToAction(nameof(Index));
-            return View();
-            
+            }
+
+            return View(jobs);
+
         }
-        private bool JobsExists(int id)
-        {
-            return myContext.Jobs.Any(e => e.Id == id);
-        }
+       
     }
 }

@@ -12,20 +12,25 @@ namespace MCC69APP.Controllers
 {
     public class EmployeesController : Controller
     {
-        MyContext myContext;
+        HttpAPi<Employees> httpAPI;
+        HttpAPi<Departments> httpAPIDepartments;
+        HttpAPi<Jobs> httpAPIJobs;
         public EmployeesController(MyContext myContext)
         {
-            this.myContext = myContext;
+            this.httpAPI = new HttpAPi<Employees>("Employees");
+            this.httpAPIDepartments = new HttpAPi<Departments>("Departments");
+            this.httpAPIJobs = new HttpAPi<Jobs>("Jobs");
         }
         public IActionResult Index()
         {
-            
-            var data = myContext.Employees.Include(x => x.Departments).Include(x => x.Jobs).ToList();
-            /*var manager = myContext.Employees.Where(x => x.Manager_Id != null).ToList();
-            var result = data.Join(manager, x => x, y => y, (x, y) => x).ToList();*/
-            
-            //var data = myContext.Employees.Include(e => e.Departments).Include(e => e.Jobs).ToList();
-            return View(data);
+
+            var employees = httpAPI.Get().ToList();
+
+            if (employees == Enumerable.Empty<Countries>())
+            {
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+            }
+            return View(employees);
         }
         public IActionResult Details(int? id)
         {
@@ -33,20 +38,21 @@ namespace MCC69APP.Controllers
             {
                 return NotFound();
             }
-            var data = myContext.Employees.Include(e => e.Departments).Include(e => e.Jobs).SingleOrDefault(x => x.Id.Equals(id));
-            
-            if (data == null)
+
+
+            var employees = httpAPI.Get(id);
+            if (employees == null)
             {
-                return NotFound();
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
             }
 
-            return View(data);
+            return View(employees);
         }
         public IActionResult Create()
         {
-            ViewData["Department_Id"] = new SelectList(myContext.Departments, "Id", "Name");
-            ViewData["Job_Id"] = new SelectList(myContext.Jobs, "Id", "JobTitle");
-            ViewData["Manager_Id"] = new SelectList(myContext.Employees, "Id", "Id");
+            ViewData["Department_Id"] = new SelectList(httpAPIDepartments.Get().ToList(), "Id", "Name");
+            ViewData["Job_Id"] = new SelectList(httpAPIJobs.Get().ToList(), "Id", "JobTitle");
+            ViewData["Manager_Id"] = new SelectList(httpAPI.Get().ToList(), "Id", "Id");
             return View();
         }
 
@@ -54,16 +60,12 @@ namespace MCC69APP.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create([Bind("Id,FirstName,LastName,Email,PhoneNumber,HireDate,Salary,Job_Id,Manager_Id,Department_Id")] Employees employees)
         {
-            if (ModelState.IsValid)
+            string result = httpAPI.Create(employees);
+            if (!string.IsNullOrWhiteSpace(result) && result == "200")
             {
-                myContext.Employees.Add(employees);
-                var result = myContext.SaveChanges();
-                if (result > 0)
-                    return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index));
             }
-            ViewData["Department_Id"] = new SelectList(myContext.Departments, "Id", "Id", employees.Department_Id);
-            ViewData["Job_Id"] = new SelectList(myContext.Jobs, "Id", "Id", employees.Job_Id);
-            ViewData["Manager_Id"] = new SelectList(myContext.Employees, "Id", "Id", employees.Manager_Id);
+
             return View(employees);
         }
         public IActionResult Edit(int? id)
@@ -73,52 +75,29 @@ namespace MCC69APP.Controllers
                 return NotFound();
             }
 
-            var data = myContext.Employees.Find(id);
-            if (data == null)
+
+            var employees = httpAPI.Get(id);
+            if (employees == null)
             {
-                return NotFound();
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
             }
-            ViewData["Department_Id"] = new SelectList(myContext.Departments, "Id", "Id", data.Department_Id);
-            ViewData["Job_Id"] = new SelectList(myContext.Jobs, "Id", "Id", data.Job_Id);
-            ViewData["Manager_Id"] = new SelectList(myContext.Employees, "Id", "Id", data.Manager_Id);
-            return View(data);
+
+           
+            ViewData["Department_Id"] = new SelectList(httpAPIDepartments.Get().ToList(), "Id", "Id", employees.Department_Id);
+            ViewData["Job_Id"] = new SelectList(httpAPIJobs.Get().ToList(), "Id", "Id", employees.Job_Id);
+            ViewData["Manager_Id"] = new SelectList(httpAPI.Get().ToList(), "Id", "Id", employees.Manager_Id);
+            return View(employees);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, [Bind("Id,FirstName,LastName,Email,PhoneNumber,HireDate,Salary,Job_Id,Manager_Id,Department_Id")] Employees employees)
+        public IActionResult Edit([Bind("Id,FirstName,LastName,Email,PhoneNumber,HireDate,Salary,Job_Id,Manager_Id,Department_Id")] Employees employees)
         {
-            if (id != employees.Id)
+            string result = httpAPI.Edit(employees);
+            if (!string.IsNullOrWhiteSpace(result) && result == "200")
             {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-
-                    myContext.Employees.Update(employees);
-                    var result=myContext.SaveChanges();
-                    if (result > 0)
-                        return RedirectToAction(nameof(Index));
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!EmployeesExists(employees.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Department_Id"] = new SelectList(myContext.Departments, "Id", "Id", employees.Department_Id);
-            ViewData["Job_Id"] = new SelectList(myContext.Jobs, "Id", "Id", employees.Job_Id);
-            ViewData["Manager_Id"] = new SelectList(myContext.Employees, "Id", "Id", employees.Manager_Id);
             return View(employees);
         }
         public IActionResult Delete(int? id)
@@ -127,33 +106,31 @@ namespace MCC69APP.Controllers
             {
                 return NotFound();
             }
-            
-            var data= myContext.Employees.Include(e => e.Jobs).Include(e => e.Departments).Include(e => e.Manager).FirstOrDefault(m => m.Id == id);
-    
-            if (data == null)
+
+
+            var employees = httpAPI.Get(id);
+            if (employees == null)
             {
-                return NotFound();
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
             }
 
-            return View(data);
+            return View(employees);
         }
 
  
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(int id)
+        public IActionResult Delete(Employees employees)
         {
 
-            var data = myContext.Employees.Find(id);
-            myContext.Employees.Remove(data);
-            var result=myContext.SaveChanges();
-            if (result > 0)
+            string result = httpAPI.Delete(employees);
+            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            {
                 return RedirectToAction(nameof(Index));
-            return View();
+            }
+
+            return View(employees);
         }
-        private bool EmployeesExists(int id)
-        {
-            return myContext.Employees.Any(e => e.Id == id);
-        }
+       
     }
 }

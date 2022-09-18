@@ -12,50 +12,75 @@ namespace MCC69APP.Controllers
 {
     public class CountriesController : Controller
     {
-        MyContext myContext;
-        public CountriesController(MyContext myContext)
+        HttpAPi<Countries> httpAPI;
+        HttpAPi<Regions> httpAPIRegions;
+        public CountriesController()
         {
-            this.myContext = myContext;
+            this.httpAPI = new HttpAPi<Countries>("Countries");
+            this.httpAPIRegions = new HttpAPi<Regions>("Regions");
         }
         public IActionResult Index()
         {
-            var data = myContext.Countries.Include(x => x.Regions).ToList();
-            
-            return View(data);
+            IEnumerable<Countries> countries = null;
+            countries = httpAPI.Get();
+
+            if (countries == Enumerable.Empty<Countries>())
+            {
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+            }
+            return View(countries);
         }
 
         public IActionResult Create() 
         {
-            var region = myContext.Regions.ToList();
-            ViewBag.Regions = new SelectList(region, "Id", "Name");
+
+            IEnumerable<Regions> regions = null;
+            regions = httpAPIRegions.Get();
+            ViewBag.Regions = new SelectList(regions, "Id", "Name");
             return View();
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(Countries countries)
         {
-            myContext.Countries.Add(countries);
-            var result = myContext.SaveChanges();
-            if (result > 0)
-                return RedirectToAction("Index", "Countries");
-            return View();
+            string result = httpAPI.Create(countries);
+            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(countries);
         }
         public IActionResult Edit(int id)
         {
-            var region = myContext.Regions.ToList();
-            ViewBag.Regions = new SelectList(region, "Id", "Name");
-            var country = myContext.Countries.Include("Regions").SingleOrDefault(x => x.Id.Equals(id));
-            return View(country);
+            IEnumerable<Regions> regions = null;
+            regions = httpAPIRegions.Get();
+            ViewBag.Regions = new SelectList(regions, "Id", "Name");
+
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            Countries countries = null;
+            countries = httpAPI.Get(id);
+            if (countries == null)
+            {
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+            }
+            
+            return View(countries);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Countries countries)
         {
-            myContext.Entry(countries).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-            var result = myContext.SaveChanges();
-            if (result > 0)
-                return RedirectToAction("Index", "Countries");
-            return View();
+            string result = httpAPI.Edit(countries);
+            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            return View(countries);
         }
         //Detail
         public IActionResult Details(int? id)
@@ -65,33 +90,44 @@ namespace MCC69APP.Controllers
                 return NotFound();
             }
 
-            var data = myContext.Countries.Include(x => x.Regions).FirstOrDefault(m => m.Id == id);
-
-            if (data == null)
+            Countries countries = null;
+            countries = httpAPI.Get(id);
+            if (countries == null)
             {
-                return NotFound();
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
             }
 
-            return View(data);
+            return View(countries);
         }
 
         //DELETE
         public IActionResult Delete(int id)
         {
-            var data = myContext.Countries.Include(x => x.Regions).SingleOrDefault(x => x.Id.Equals(id));
+            if (id == null)
+            {
+                return NotFound();
+            }
 
-            return View(data);
+            Countries countries = null;
+            countries = httpAPI.Get(id);
+            if (countries == null)
+            {
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+            }
+
+            return View(countries);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Delete(Countries countries)
         {
-            var data = myContext.Countries.Find(countries.Id);
-            myContext.Countries.Remove(data);
-            var result = myContext.SaveChanges();
-            if (result > 0)
-                return RedirectToAction("Index", "Countries");
-            return View();
+            string result = httpAPI.Delete(countries);
+            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(countries);
         }
     }
 }

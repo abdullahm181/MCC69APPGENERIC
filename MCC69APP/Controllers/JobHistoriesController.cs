@@ -12,15 +12,26 @@ namespace MCC69APP.Controllers
 {
     public class JobHistoryController : Controller
     {
-        MyContext myContext;
+        HttpAPi<Employees> httpAPIEmployees;
+        HttpAPi<JobHistory> httpAPI;
+        HttpAPi<Jobs> httpAPIJobs;
+        HttpAPi<Departments> httpAPIDepartments;
         public JobHistoryController(MyContext myContext)
         {
-            this.myContext = myContext;
+            this.httpAPIEmployees = new HttpAPi<Employees>("Employees");
+            this.httpAPI = new HttpAPi<JobHistory>("JobHistory");
+            this.httpAPIDepartments = new HttpAPi<Departments>("Departments");
+            this.httpAPIJobs = new HttpAPi<Jobs>("Jobs");
         }
         public IActionResult Index()
         {
-            var data = myContext.JobHistory.Include(j => j.Departments).Include(j => j.Jobs).Include(j => j.Employees).ToList();
-            return View(data);
+            var jobHistories = httpAPI.Get().ToList();
+
+            if (jobHistories == Enumerable.Empty<Countries>())
+            {
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+            }
+            return View(jobHistories);
         }
         public IActionResult Details(int? id)
         {
@@ -28,23 +39,21 @@ namespace MCC69APP.Controllers
             {
                 return NotFound();
             }
-            var data=myContext.JobHistory.Include(j => j.Departments)
-                .Include(j => j.Employees)
-                .Include(j => j.Jobs)
-                .FirstOrDefault(m => m.Id == id);
-            
-            if (data == null)
+
+
+            var jobHistory = httpAPI.Get(id);
+            if (jobHistory == null)
             {
-                return NotFound();
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
             }
 
-            return View(data);
+            return View(jobHistory);
         }
         public IActionResult Create()
         {
-            ViewData["Department_Id"] = new SelectList(myContext.Departments, "Id", "Name");
-            ViewData["Id"] = new SelectList(myContext.Employees, "Id","Id");
-            ViewData["Job_Id"] = new SelectList(myContext.Jobs, "Id", "JobTitle");
+            ViewData["Department_Id"] = new SelectList(httpAPIDepartments.Get().ToList(), "Id", "Name");
+            ViewData["Id"] = new SelectList(httpAPIEmployees.Get().ToList(), "Id","Id");
+            ViewData["Job_Id"] = new SelectList(httpAPIJobs.Get().ToList(), "Id", "JobTitle");
             return View();
         }
 
@@ -52,16 +61,12 @@ namespace MCC69APP.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create([Bind("Id,StartDate,EndDate,Job_Id,Department_Id")] JobHistory jobHistories)
         {
-            if (ModelState.IsValid)
+            string result = httpAPI.Create(jobHistories);
+            if (!string.IsNullOrWhiteSpace(result) && result == "200")
             {
-                myContext.Add(jobHistories);
-                var result=myContext.SaveChanges();
-                if (result > 0)
-                    return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index));
             }
-            ViewData["Department_Id"] = new SelectList(myContext.Departments, "Id", "Id", jobHistories.Department_Id);
-            ViewData["Id"] = new SelectList(myContext.Employees, "Id", "Id", jobHistories.Id);
-            ViewData["Job_Id"] = new SelectList(myContext.Jobs, "Id", "Id", jobHistories.Job_Id);
+
             return View(jobHistories);
         }
         public IActionResult Edit(int? id)
@@ -70,52 +75,30 @@ namespace MCC69APP.Controllers
             {
                 return NotFound();
             }
-            
-            var data = myContext.JobHistory.Find(id);
-            if (data == null)
+
+
+            var jobHistory = httpAPI.Get(id);
+            if (jobHistory == null)
             {
-                return NotFound();
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
             }
-            ViewData["Department_Id"] = new SelectList(myContext.Departments, "Id", "Id", data.Department_Id);
-            ViewData["Id"] = new SelectList(myContext.Employees, "Id", "Id", data.Id);
-            ViewData["Job_Id"] = new SelectList(myContext.Jobs, "Id", "Id", data.Job_Id);
-            return View(data);
+
+           
+            ViewData["Department_Id"] = new SelectList(httpAPIDepartments.Get().ToList(), "Id", "Id", jobHistory.Department_Id);
+            //ViewData["Id"] = new SelectList(httpAPIEmployees.Get().ToList(), "Id", "Id", jobHistory.Id);
+            ViewData["Job_Id"] = new SelectList(httpAPIJobs.Get().ToList(), "Id", "Id", jobHistory.Job_Id);
+            return View(jobHistory);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, [Bind("Id,StartDate,EndDate,Job_Id,Department_Id")] JobHistory jobHistories)
+        public IActionResult Edit([Bind("Id,StartDate,EndDate,Job_Id,Department_Id")] JobHistory jobHistories)
         {
-            if (id != jobHistories.Id)
+            string result = httpAPI.Edit(jobHistories);
+            if (!string.IsNullOrWhiteSpace(result) && result == "200")
             {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    myContext.Update(jobHistories);
-                    var result = myContext.SaveChanges();
-                    if (result > 0)
-                        return RedirectToAction(nameof(Index));
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!JobHistoryExists(jobHistories.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Department_Id"] = new SelectList(myContext.Departments, "Id", "Id", jobHistories.Department_Id);
-            ViewData["Id"] = new SelectList(myContext.Employees, "Id", "Id", jobHistories.Id);
-            ViewData["Job_Id"] = new SelectList(myContext.Jobs, "Id", "Id", jobHistories.Job_Id);
             return View(jobHistories);
         }
         public IActionResult Delete(int? id)
@@ -125,33 +108,28 @@ namespace MCC69APP.Controllers
                 return NotFound();
             }
 
-            var data = myContext.JobHistory
-                .Include(j => j.Departments)
-                .Include(j => j.Employees)
-                .Include(j => j.Jobs)
-                .FirstOrDefault(m => m.Id == id);
-            if (data == null)
+
+            var jobHistory = httpAPI.Get(id);
+            if (jobHistory == null)
             {
-                return NotFound();
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
             }
 
-            return View(data);
+            return View(jobHistory);
         }
 
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(int id)
+        public IActionResult Delete(JobHistory jobHistory)
         {
-            var data = myContext.JobHistory.Find(id);
-            myContext.JobHistory.Remove(data);
-            var result = myContext.SaveChanges();
-            if (result > 0)
+            string result = httpAPI.Delete(jobHistory);
+            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            {
                 return RedirectToAction(nameof(Index));
-            return View();
+            }
+
+            return View(jobHistory);
         }
-        private bool JobHistoryExists(int id)
-        {
-            return myContext.JobHistory.Any(e => e.Id == id);
-        }
+       
     }
 }

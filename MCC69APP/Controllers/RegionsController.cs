@@ -17,7 +17,122 @@ namespace MCC69APP.Controllers
 {
     public class RegionsController : Controller
     {
+        HttpAPi<Regions> httpAPI;
+        public RegionsController()
+        {
+            this.httpAPI = new HttpAPi<Regions>("Regions");
+        }
         // GET ALL
+        
+        public IActionResult Index()
+        {
+            IEnumerable<Regions> regions = null;
+            regions = httpAPI.Get();
+
+            if (regions == Enumerable.Empty<Regions>())
+            {
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+            }
+            return View(regions);
+
+        }
+        // GET By ID
+
+        public IActionResult Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            Regions regions = null;
+            regions = httpAPI.Get(id);
+            if (regions == null) {
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+            }
+            
+            return View(regions);
+
+
+        }
+        // PUT
+        public IActionResult Edit(int id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            Regions regions = null;
+            regions = httpAPI.Get(id);
+            if (regions == null)
+            {
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+            }
+
+            return View(regions);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(Regions regions)
+        {
+            string result = httpAPI.Edit(regions);
+            if (!string.IsNullOrWhiteSpace(result)&& result=="200") {
+                return RedirectToAction(nameof(Index));
+            }
+            return View(regions);
+        }
+        // POST
+        public IActionResult Create()
+        {
+            return View();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create(Regions regions)
+        {
+            string result = httpAPI.Create(regions);
+            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(regions);
+        }
+        
+
+        //DELETE
+        public IActionResult Delete(int id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            Regions regions = null;
+            regions = httpAPI.Get(id);
+            if (regions == null)
+            {
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+            }
+
+            return View(regions);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Delete(Regions regions)
+        {
+            string result = httpAPI.Delete(regions);
+            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(regions);
+        }
+
+
+        /*// GET ALL
         string Baseurl = "https://localhost:5001/api/";
         public IActionResult Index()
         {
@@ -39,7 +154,7 @@ namespace MCC69APP.Controllers
                     JArray data = (JArray)rss["data"];
                     regions = JsonConvert.DeserializeObject<List<Regions>>(JsonConvert.SerializeObject(data));
                     //RootObject<Regions> ro = JsonConvert.DeserializeObject<RootObject<Regions>>(ResultJsonString.Result);
-                   // regions = ro.Data;
+                    // regions = ro.Data;
                 }
                 else //web api sent error response 
                 {
@@ -51,7 +166,7 @@ namespace MCC69APP.Controllers
                 }
             }
             return View(regions);
-            
+
         }
         // GET By ID
 
@@ -82,7 +197,7 @@ namespace MCC69APP.Controllers
                 }
                 else //web api sent error response 
                 {
-                   
+
                     ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
                 }
             }
@@ -98,7 +213,7 @@ namespace MCC69APP.Controllers
             {
                 client.BaseAddress = new Uri(Baseurl);
                 //HTTP GET
-                var responseTask = client.GetAsync("Regions/"+ id.ToString());
+                var responseTask = client.GetAsync("Regions/" + id.ToString());
                 responseTask.Wait();
 
                 var result = responseTask.Result;
@@ -125,10 +240,10 @@ namespace MCC69APP.Controllers
         {
             using (var client = new HttpClient())
             {
-                client.BaseAddress = new Uri(Baseurl+"Regions/"+ regions.Id.ToString());
+                client.BaseAddress = new Uri(Baseurl + "Regions/" + regions.Id.ToString());
 
                 //HTTP POST
-                var putTask = client.PutAsJsonAsync<Regions>(client.BaseAddress ,regions);
+                var putTask = client.PutAsJsonAsync<Regions>(client.BaseAddress, regions);
                 putTask.Wait();
 
                 var result = putTask.Result;
@@ -151,7 +266,7 @@ namespace MCC69APP.Controllers
         {
             using (var client = new HttpClient())
             {
-                client.BaseAddress = new Uri(Baseurl+"Regions");
+                client.BaseAddress = new Uri(Baseurl + "Regions");
 
                 //HTTP POST
                 var postTask = client.PostAsJsonAsync<Regions>("Regions", regions);
@@ -201,14 +316,14 @@ namespace MCC69APP.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Delete(Countries countries)
+        public IActionResult Delete(Regions regions)
         {
             using (var client = new HttpClient())
             {
                 client.BaseAddress = new Uri(Baseurl);
 
                 //HTTP DELETE
-                var deleteTask = client.DeleteAsync("Regions/" + countries.Id.ToString());
+                var deleteTask = client.DeleteAsync("Regions/" + regions.Id.ToString());
                 deleteTask.Wait();
 
                 var result = deleteTask.Result;
@@ -220,8 +335,8 @@ namespace MCC69APP.Controllers
             }
 
             return RedirectToAction(nameof(Index));
-        }
-       
+        }*/
+
 
     }
 }
