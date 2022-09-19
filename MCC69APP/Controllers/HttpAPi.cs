@@ -9,7 +9,7 @@ using System.Net.Http;
 using Newtonsoft.Json;
 
 using Newtonsoft.Json.Linq;
-
+using System.Net.Http.Headers;
 
 namespace MCC69APP.Controllers
 {
@@ -23,11 +23,16 @@ namespace MCC69APP.Controllers
         }
         // GET ALL
         string Baseurl = "https://localhost:5001/api/";
-        public IEnumerable<tEntity> Get()
+        public IEnumerable<tEntity> Get(string token=null)
         {
             IEnumerable<tEntity> entity = null;
             using (var client = new HttpClient())
             {
+
+                if (token != null) {
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                }
+                //
                 client.BaseAddress = new Uri(Baseurl);
                 //HTTP GET
                 var responseTask = client.GetAsync(EndPointString);
@@ -42,6 +47,8 @@ namespace MCC69APP.Controllers
                     JObject rss = JObject.Parse(ResultJsonString.Result);
                     JArray data = (JArray)rss["data"];
                     entity = JsonConvert.DeserializeObject<List<tEntity>>(JsonConvert.SerializeObject(data));
+                    
+                    
                     //RootObject<Regions> ro = JsonConvert.DeserializeObject<RootObject<Regions>>(ResultJsonString.Result);
                     // regions = ro.Data;
                 }

@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Http;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Newtonsoft.Json;
-using MCC69APP.ViewModel;
+
 using Newtonsoft.Json.Linq;
 
 namespace MCC69APP.Controllers

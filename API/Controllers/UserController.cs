@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace API.Controllers
 {
-    
+    [Authorize]
     public class UserController : Controller<User, UserRepository>
     {
         
