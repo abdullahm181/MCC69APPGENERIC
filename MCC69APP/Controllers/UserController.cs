@@ -14,12 +14,14 @@ namespace MCC69APP.Controllers
         public UserController()
         {
             httpAPI = new HttpAPi<User>("User");
-            if (string.IsNullOrEmpty(HttpContext.Session.GetString("Token"))) { 
-                
-            }
+            
         }
         public IActionResult Index()
         {
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("Token")))
+            {
+                return View("UnAuthorize");
+            }
             string token = HttpContext.Session.GetString("Token");
             var user = httpAPI.Get(token);
 
@@ -28,6 +30,9 @@ namespace MCC69APP.Controllers
                 ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
             }
             return View(user);
+        }
+        public IActionResult UnAuthorize() {
+            return View();
         }
     }
 }

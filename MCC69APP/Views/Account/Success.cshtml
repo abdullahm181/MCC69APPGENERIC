@@ -1,5 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Http;
 <h3>Success Page</h3>
-    Welcome @Context.Session.GetString("username")
+    Welcome @Context.Session.GetString("Token")
     <br>
     <a asp-controller="account" asp-action="logout">Logout</a>

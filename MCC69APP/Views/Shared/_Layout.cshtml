@@ -36,10 +36,15 @@
                                 @Html.ActionLink("Jobs", "Index", "Jobs", new { area = "" }, new { @class = "dropdown-item" })
                                 @Html.ActionLink("JobHistory", "Index", "JobHistory", new { area = "" }, new { @class = "dropdown-item" })
                                 @Html.ActionLink("Employees", "Index", "Employees", new { area = "" }, new { @class = "dropdown-item" })
+                                @Html.ActionLink("User", "Index", "User", new { area = "" }, new { @class = "dropdown-item" })
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="#">ALL</a>
                             </div>
-                        </li>                        
+                        </li>  
+                        <li class="nav-item">
+                            
+                            @Html.ActionLink("Login", "Index", "Account", new { area = "" }, new { @class = "nav-link text-dark" })
+                        </li>
                     </ul>
                 </div>
             </div>
