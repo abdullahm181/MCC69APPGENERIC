@@ -1,31 +1,33 @@
-﻿using MCC69APP.Context;
+﻿using MCC69APP.Base;
+using MCC69APP.Context;
 using MCC69APP.Models;
+using MCC69APP.Repositories.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace MCC69APP.Controllers
 {
-    public class JobHistoryController : Controller
+    public class JobHistoryController : BaseController<JobHistory,JobHistoriesRepository>
     {
-        HttpAPi<Employees> httpAPIEmployees;
-        HttpAPi<JobHistory> httpAPI;
-        HttpAPi<Jobs> httpAPIJobs;
-        HttpAPi<Departments> httpAPIDepartments;
-        public JobHistoryController(MyContext myContext)
+        EmployeesRepository employeesRepository;
+        JobsRepository jobsRepository;
+        DepartmentsRepository departmentsRepository;
+        
+        public JobHistoryController(JobHistoriesRepository jobHistoriesRepository, EmployeesRepository employeesRepository,JobsRepository jobsRepository,DepartmentsRepository departmentsRepository):base(jobHistoriesRepository)
         {
-            this.httpAPIEmployees = new HttpAPi<Employees>("Employees");
-            this.httpAPI = new HttpAPi<JobHistory>("JobHistory");
-            this.httpAPIDepartments = new HttpAPi<Departments>("Departments");
-            this.httpAPIJobs = new HttpAPi<Jobs>("Jobs");
+            this.employeesRepository = employeesRepository;
+            this.jobsRepository = jobsRepository;
+            this.departmentsRepository = departmentsRepository;
         }
         public IActionResult Index()
         {
-            var jobHistories = httpAPI.Get().ToList();
+            var jobHistories = Get();
 
             if (jobHistories == Enumerable.Empty<Countries>())
             {
@@ -33,7 +35,7 @@ namespace MCC69APP.Controllers
             }
             return View(jobHistories);
         }
-        public IActionResult Details(int? id)
+        public IActionResult Details(int id)
         {
             if (id == null)
             {
@@ -41,7 +43,7 @@ namespace MCC69APP.Controllers
             }
 
 
-            var jobHistory = httpAPI.Get(id);
+            var jobHistory = Get(id);
             if (jobHistory == null)
             {
                 ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
@@ -51,9 +53,9 @@ namespace MCC69APP.Controllers
         }
         public IActionResult Create()
         {
-            ViewData["Department_Id"] = new SelectList(httpAPIDepartments.Get().ToList(), "Id", "Name");
-            ViewData["Id"] = new SelectList(httpAPIEmployees.Get().ToList(), "Id","Id");
-            ViewData["Job_Id"] = new SelectList(httpAPIJobs.Get().ToList(), "Id", "JobTitle");
+            ViewData["Department_Id"] = new SelectList(departmentsRepository.Get(), "Id", "Name");
+            ViewData["Id"] = new SelectList(employeesRepository.Get(), "Id","Id");
+            ViewData["Job_Id"] = new SelectList(jobsRepository.Get(), "Id", "JobTitle");
             return View();
         }
 
@@ -61,15 +63,15 @@ namespace MCC69APP.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create([Bind("Id,StartDate,EndDate,Job_Id,Department_Id")] JobHistory jobHistories)
         {
-            string result = httpAPI.Create(jobHistories);
-            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            var result = Post(jobHistories);
+            if (result == HttpStatusCode.OK)
             {
                 return RedirectToAction(nameof(Index));
             }
 
             return View(jobHistories);
         }
-        public IActionResult Edit(int? id)
+        public IActionResult Edit(int id)
         {
             if (id == null)
             {
@@ -77,16 +79,16 @@ namespace MCC69APP.Controllers
             }
 
 
-            var jobHistory = httpAPI.Get(id);
+            var jobHistory = Get(id);
             if (jobHistory == null)
             {
                 ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
             }
 
            
-            ViewData["Department_Id"] = new SelectList(httpAPIDepartments.Get().ToList(), "Id", "Id", jobHistory.Department_Id);
+            ViewData["Department_Id"] = new SelectList(departmentsRepository.Get(), "Id", "Id", jobHistory.Department_Id);
             //ViewData["Id"] = new SelectList(httpAPIEmployees.Get().ToList(), "Id", "Id", jobHistory.Id);
-            ViewData["Job_Id"] = new SelectList(httpAPIJobs.Get().ToList(), "Id", "Id", jobHistory.Job_Id);
+            ViewData["Job_Id"] = new SelectList(jobsRepository.Get(), "Id", "Id", jobHistory.Job_Id);
             return View(jobHistory);
         }
 
@@ -94,14 +96,14 @@ namespace MCC69APP.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit([Bind("Id,StartDate,EndDate,Job_Id,Department_Id")] JobHistory jobHistories)
         {
-            string result = httpAPI.Edit(jobHistories);
-            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            var result = Put(jobHistories);
+            if (result == HttpStatusCode.OK)
             {
                 return RedirectToAction(nameof(Index));
             }
             return View(jobHistories);
         }
-        public IActionResult Delete(int? id)
+        public IActionResult Delete(int id)
         {
             if (id == null)
             {
@@ -109,7 +111,7 @@ namespace MCC69APP.Controllers
             }
 
 
-            var jobHistory = httpAPI.Get(id);
+            var jobHistory = Get(id);
             if (jobHistory == null)
             {
                 ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
@@ -122,8 +124,8 @@ namespace MCC69APP.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Delete(JobHistory jobHistory)
         {
-            string result = httpAPI.Delete(jobHistory);
-            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            var result = DeleteEntity(jobHistory);
+            if (result == HttpStatusCode.OK)
             {
                 return RedirectToAction(nameof(Index));
             }

@@ -1,28 +1,29 @@
-﻿using MCC69APP.Context;
+﻿using MCC69APP.Base;
+using MCC69APP.Context;
 using MCC69APP.Models;
+using MCC69APP.Repositories.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace MCC69APP.Controllers
 {
-    public class DepartmentsController : Controller
+    public class DepartmentsController : BaseController<Departments, DepartmentsRepository>
     {
-        HttpAPi<Departments> httpAPI;
-        HttpAPi<Locations> httpAPILocations;
-        public DepartmentsController(MyContext myContext)
+        LocationsRepository locationsRepository;
+        public DepartmentsController(DepartmentsRepository departmentsRepository,LocationsRepository locationsRepository):base(departmentsRepository)
         {
-            this.httpAPI = new HttpAPi<Departments>("Departments");
-            this.httpAPILocations = new HttpAPi<Locations>("Locations");
+            this.locationsRepository = locationsRepository;
         }
         public IActionResult Index()
         {
 
-            var departments = httpAPI.Get().ToList();
+            var departments = Get();
 
             if (departments == Enumerable.Empty<Countries>())
             {
@@ -30,7 +31,7 @@ namespace MCC69APP.Controllers
             }
             return View(departments);
         }
-        public IActionResult Details(int? id)
+        public IActionResult Details(int id)
         {
             if (id == null)
             {
@@ -38,7 +39,7 @@ namespace MCC69APP.Controllers
             }
 
 
-            var departments = httpAPI.Get(id);
+            var departments = Get(id);
             if (departments == null)
             {
                 ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
@@ -49,7 +50,7 @@ namespace MCC69APP.Controllers
         public IActionResult Create()
         {
             
-            ViewBag.Locations = new SelectList(httpAPILocations.Get().ToList(), "Id", "StreetAddress");
+            ViewBag.Locations = new SelectList(locationsRepository.Get(), "Id", "StreetAddress");
             
             return View();
         }
@@ -59,15 +60,15 @@ namespace MCC69APP.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create([Bind("Id,Name,Manager_Id,Location_Id")] Departments departments)
         {
-            string result = httpAPI.Create(departments);
-            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            var result = Post(departments);
+            if (result == HttpStatusCode.OK)
             {
                 return RedirectToAction(nameof(Index));
             }
 
             return View(departments);
         }
-        public IActionResult Edit(int? id)
+        public IActionResult Edit(int id)
         {
             if (id == null)
             {
@@ -75,12 +76,12 @@ namespace MCC69APP.Controllers
             }
 
 
-            var departments = httpAPI.Get(id);
+            var departments = Get(id);
             if (departments == null)
             {
                 ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
             }
-            ViewBag.Location_Id= new SelectList(httpAPILocations.Get().ToList(), "Id", "StreetAddress", departments.Location_Id);
+            ViewBag.Location_Id= new SelectList(locationsRepository.Get(), "Id", "StreetAddress", departments.Location_Id);
             return View(departments); ;
         }
 
@@ -89,14 +90,14 @@ namespace MCC69APP.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit([Bind("Id,Name,Manager_Id,Location_Id")] Departments departments)
         {
-            string result = httpAPI.Edit(departments);
-            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            var result = Put(departments);
+            if (result == HttpStatusCode.OK)
             {
                 return RedirectToAction(nameof(Index));
             }
             return View(departments);
         }
-        public IActionResult Delete(int? id)
+        public IActionResult Delete(int id)
         {
             if (id == null)
             {
@@ -104,7 +105,7 @@ namespace MCC69APP.Controllers
             }
 
 
-            var departments = httpAPI.Get(id);
+            var departments = Get(id);
             if (departments == null)
             {
                 ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
@@ -118,8 +119,8 @@ namespace MCC69APP.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Delete(Departments departments)
         {
-            string result = httpAPI.Delete(departments);
-            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            var result = DeleteEntity(departments);
+            if (result == HttpStatusCode.OK)
             {
                 return RedirectToAction(nameof(Index));
             }

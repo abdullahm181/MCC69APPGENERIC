@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace API.Middleware
 {
-    public class Hashing
+    public class Cryptograph
     {
         private static string GetRandomSalt() 
         {

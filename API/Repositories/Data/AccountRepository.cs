@@ -25,7 +25,7 @@ namespace API.Repositories.Data
                 return null;
 
             //check if password is correct
-            if (!Hashing.ValidatePassword(password,user.Password))
+            if (!Cryptograph.ValidatePassword(password,user.Password))
                 return null;
 
             // authentication successful
@@ -63,7 +63,7 @@ namespace API.Repositories.Data
                 var RegisteredEmployee = myContext.Employees.SingleOrDefault(x => x.Email.Equals(register.Email)).Id;
                
                 //Create Bcrypt hasing ppaswrod
-                var passwordHash = Hashing.HashPassword(register.Password);
+                var passwordHash = Cryptograph.HashPassword(register.Password);
                 
                 //Adding User
                 User user = new User()

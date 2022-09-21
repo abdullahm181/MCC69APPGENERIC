@@ -23,15 +23,15 @@ namespace MCC69APP.Controllers
         }
         // GET ALL
         string Baseurl = "https://localhost:5001/api/";
-        public IEnumerable<tEntity> Get(string token=null)
+        public IEnumerable<tEntity> Get()
         {
             IEnumerable<tEntity> entity = null;
             using (var client = new HttpClient())
             {
 
-                if (token != null) {
+               /* if (token != null) {
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                }
+                }*/
                 //
                 client.BaseAddress = new Uri(Baseurl);
                 //HTTP GET

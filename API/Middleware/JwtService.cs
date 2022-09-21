@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using API.ViewModels;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -10,32 +11,58 @@ using System.Threading.Tasks;
 
 namespace API.Middleware
 {
-    public class JwtService
+    public interface IJWTHandler
     {
+        string GenerateToken(Account account);
+        string GetName(string token);
+        string GetEmail(string token);
+    }
+    public class JwtService : IJWTHandler
+    {
+        
         private readonly IConfiguration iconfiguration;
         public JwtService(IConfiguration iconfiguration)
         {
             this.iconfiguration = iconfiguration;
         }
-        public string GenerateSecurityToken(int Id,string Email,string FullName,string Role) {
+        public string GenerateToken(Account account) {
+            if (account == null)
+            {
+                return null;
+            }
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenKey = Encoding.UTF8.GetBytes(iconfiguration["JWT:Key"]);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-                    new Claim(ClaimTypes.NameIdentifier,Id.ToString()),
-                    new Claim(ClaimTypes.Email, Email),
-                    new Claim(ClaimTypes.Name, FullName),
-                    new Claim(ClaimTypes.Role, Role)
+                    new Claim(ClaimTypes.NameIdentifier,account.Id.ToString()),
+                    new Claim(ClaimTypes.Email, account.Email),
+                    new Claim(ClaimTypes.Name, account.FullName),
+                    new Claim(ClaimTypes.Role, account.Role)
                 }),
                 Expires = DateTime.UtcNow.AddMinutes(5),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
+
+        }
+        public string GetName(string token)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            JwtSecurityToken result = tokenHandler.ReadJwtToken(token);
+
+            return result.Claims.FirstOrDefault(claim => claim.Type.Equals("name")).Value;
         }
 
-        
+        public string GetEmail(string token)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            JwtSecurityToken result = tokenHandler.ReadJwtToken(token);
+
+            return result.Claims.FirstOrDefault(claim => claim.Type.Equals("email")).Value;
+        }
+
     }
 }

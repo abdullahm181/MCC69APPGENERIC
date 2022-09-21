@@ -17,6 +17,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Http;
+using API.Middleware;
 
 namespace API
 {
@@ -45,12 +47,14 @@ namespace API
             services.AddScoped<UserRoleRepository>();
             services.AddScoped<AccountRepository>();
             services.AddControllers();
+
             services.AddAuthentication(x =>
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(o =>
             {
+                o.RequireHttpsMetadata = false;
                 var Key = Encoding.UTF8.GetBytes(Configuration["JWT:Key"]);
                 o.SaveToken = true;
                 o.TokenValidationParameters = new TokenValidationParameters
@@ -64,6 +68,7 @@ namespace API
                     IssuerSigningKey = new SymmetricSecurityKey(Key),
                     ClockSkew = TimeSpan.Zero
                 };
+                services.AddSingleton<IJWTHandler>(new JwtService(Configuration));
             });
 
             services.AddSwaggerGen(config =>
@@ -113,6 +118,10 @@ namespace API
 
                 
             });
+            //services.AddSession();
+            services.AddCors(option => option.AddPolicy("DefaultPolicy", builder => {
+                builder.WithOrigins("https://localhost:44305").WithMethods("GET","POST","PUT","DELETE").WithExposedHeaders("Authorization");
+            }));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -135,9 +144,12 @@ namespace API
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
             });
             app.UseHttpsRedirection();
+            app.UseCors("DefaultPolicy");
+
+           
 
             app.UseRouting();
-
+            //app.UseSession();
             app.UseAuthentication(); // This need to be added	
             app.UseAuthorization();
 

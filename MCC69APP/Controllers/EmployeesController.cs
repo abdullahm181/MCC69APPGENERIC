@@ -1,30 +1,31 @@
-﻿using MCC69APP.Context;
+﻿using MCC69APP.Base;
+using MCC69APP.Context;
 using MCC69APP.Models;
+using MCC69APP.Repositories.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace MCC69APP.Controllers
 {
-    public class EmployeesController : Controller
+    public class EmployeesController : BaseController<Employees, EmployeesRepository>
     {
-        HttpAPi<Employees> httpAPI;
-        HttpAPi<Departments> httpAPIDepartments;
-        HttpAPi<Jobs> httpAPIJobs;
-        public EmployeesController(MyContext myContext)
+        DepartmentsRepository departmentsRepository;
+        JobsRepository jobsRepository;
+        public EmployeesController(EmployeesRepository employeesRepository,DepartmentsRepository departmentsRepository,JobsRepository jobsRepository):base(employeesRepository)
         {
-            this.httpAPI = new HttpAPi<Employees>("Employees");
-            this.httpAPIDepartments = new HttpAPi<Departments>("Departments");
-            this.httpAPIJobs = new HttpAPi<Jobs>("Jobs");
+            this.departmentsRepository = departmentsRepository;
+            this.jobsRepository = jobsRepository;
         }
         public IActionResult Index()
         {
 
-            var employees = httpAPI.Get().ToList();
+            var employees =Get();
 
             if (employees == Enumerable.Empty<Countries>())
             {
@@ -32,7 +33,7 @@ namespace MCC69APP.Controllers
             }
             return View(employees);
         }
-        public IActionResult Details(int? id)
+        public IActionResult Details(int id)
         {
             if (id == null)
             {
@@ -40,7 +41,7 @@ namespace MCC69APP.Controllers
             }
 
 
-            var employees = httpAPI.Get(id);
+            var employees = Get(id);
             if (employees == null)
             {
                 ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
@@ -50,9 +51,9 @@ namespace MCC69APP.Controllers
         }
         public IActionResult Create()
         {
-            ViewData["Department_Id"] = new SelectList(httpAPIDepartments.Get().ToList(), "Id", "Name");
-            ViewData["Job_Id"] = new SelectList(httpAPIJobs.Get().ToList(), "Id", "JobTitle");
-            ViewData["Manager_Id"] = new SelectList(httpAPI.Get().ToList(), "Id", "Id");
+            ViewData["Department_Id"] = new SelectList(departmentsRepository.Get(), "Id", "Name");
+            ViewData["Job_Id"] = new SelectList(jobsRepository.Get(), "Id", "JobTitle");
+            ViewData["Manager_Id"] = new SelectList(Get(), "Id", "Id");
             return View();
         }
 
@@ -60,15 +61,15 @@ namespace MCC69APP.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create([Bind("Id,FirstName,LastName,Email,PhoneNumber,HireDate,Salary,Job_Id,Manager_Id,Department_Id")] Employees employees)
         {
-            string result = httpAPI.Create(employees);
-            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            var result = Post(employees);
+            if (result == HttpStatusCode.OK)
             {
                 return RedirectToAction(nameof(Index));
             }
 
             return View(employees);
         }
-        public IActionResult Edit(int? id)
+        public IActionResult Edit(int id)
         {
             if (id == null)
             {
@@ -76,16 +77,16 @@ namespace MCC69APP.Controllers
             }
 
 
-            var employees = httpAPI.Get(id);
+            var employees = Get(id);
             if (employees == null)
             {
                 ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
             }
 
            
-            ViewData["Department_Id"] = new SelectList(httpAPIDepartments.Get().ToList(), "Id", "Id", employees.Department_Id);
-            ViewData["Job_Id"] = new SelectList(httpAPIJobs.Get().ToList(), "Id", "Id", employees.Job_Id);
-            ViewData["Manager_Id"] = new SelectList(httpAPI.Get().ToList(), "Id", "Id", employees.Manager_Id);
+            ViewData["Department_Id"] = new SelectList(departmentsRepository.Get(), "Id", "Id", employees.Department_Id);
+            ViewData["Job_Id"] = new SelectList(jobsRepository.Get(), "Id", "Id", employees.Job_Id);
+            ViewData["Manager_Id"] = new SelectList(Get(), "Id", "Id", employees.Manager_Id);
             return View(employees);
         }
 
@@ -93,14 +94,14 @@ namespace MCC69APP.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit([Bind("Id,FirstName,LastName,Email,PhoneNumber,HireDate,Salary,Job_Id,Manager_Id,Department_Id")] Employees employees)
         {
-            string result = httpAPI.Edit(employees);
-            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            var result = Put(employees);
+            if (result == HttpStatusCode.OK)
             {
                 return RedirectToAction(nameof(Index));
             }
             return View(employees);
         }
-        public IActionResult Delete(int? id)
+        public IActionResult Delete(int id)
         {
             if (id == null)
             {
@@ -108,7 +109,7 @@ namespace MCC69APP.Controllers
             }
 
 
-            var employees = httpAPI.Get(id);
+            var employees = Get(id);
             if (employees == null)
             {
                 ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
@@ -123,8 +124,8 @@ namespace MCC69APP.Controllers
         public IActionResult Delete(Employees employees)
         {
 
-            string result = httpAPI.Delete(employees);
-            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            var result = DeleteEntity(employees);
+            if (result == HttpStatusCode.OK)
             {
                 return RedirectToAction(nameof(Index));
             }

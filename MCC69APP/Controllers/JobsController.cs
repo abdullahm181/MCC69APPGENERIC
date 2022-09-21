@@ -1,25 +1,28 @@
 ﻿
+using MCC69APP.Base;
 using MCC69APP.Context;
 using MCC69APP.Models;
+using MCC69APP.Repositories.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace MCC69APP.Controllers
 {
-    public class JobsController : Controller
+    public class JobsController : BaseController<Jobs,JobsRepository>
     {
-        HttpAPi<Jobs> httpAPI;
-        public JobsController(MyContext myContext)
+       
+        public JobsController(JobsRepository jobsRepository):base(jobsRepository)
         {
-            this.httpAPI = new HttpAPi<Jobs>("Jobs");
+            
         }
         public IActionResult Index()
         {
-            var jobs = httpAPI.Get().ToList();
+            var jobs = Get();
 
             if (jobs == Enumerable.Empty<Countries>())
             {
@@ -27,7 +30,7 @@ namespace MCC69APP.Controllers
             }
             return View(jobs);
         }
-        public IActionResult Details(int? id)
+        public IActionResult Details(int id)
         {
             if (id == null)
             {
@@ -35,7 +38,7 @@ namespace MCC69APP.Controllers
             }
 
 
-            var jobs = httpAPI.Get(id);
+            var jobs = Get(id);
             if (jobs == null)
             {
                 ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
@@ -53,8 +56,8 @@ namespace MCC69APP.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create([Bind("Id,JobTitle,MinSalary,MaxSalary")] Jobs jobs)
         {
-            string result = httpAPI.Create(jobs);
-            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            var result =Post(jobs);
+            if (result == HttpStatusCode.OK)
             {
                 return RedirectToAction(nameof(Index));
             }
@@ -62,7 +65,7 @@ namespace MCC69APP.Controllers
             return View(jobs);
         }
 
-        public IActionResult Edit(int? id)
+        public IActionResult Edit(int id)
         {
             if (id == null)
             {
@@ -70,7 +73,7 @@ namespace MCC69APP.Controllers
             }
 
 
-            var jobs = httpAPI.Get(id);
+            var jobs = Get(id);
             if (jobs == null)
             {
                 ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
@@ -82,14 +85,14 @@ namespace MCC69APP.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit([Bind("Id,JobTitle,MinSalary,MaxSalary")] Jobs jobs)
         {
-            string result = httpAPI.Edit(jobs);
-            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            var result = Put(jobs);
+            if (result == HttpStatusCode.OK)
             {
                 return RedirectToAction(nameof(Index));
             }
             return View(jobs);
         }
-        public IActionResult Delete(int? id)
+        public IActionResult Delete(int id)
         {
             if (id == null)
             {
@@ -97,7 +100,7 @@ namespace MCC69APP.Controllers
             }
 
 
-            var jobs = httpAPI.Get(id);
+            var jobs = Get(id);
             if (jobs == null)
             {
                 ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
@@ -111,8 +114,8 @@ namespace MCC69APP.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Delete(Jobs jobs)
         {
-            string result = httpAPI.Delete(jobs);
-            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            var result = DeleteEntity(jobs);
+            if (result == HttpStatusCode.OK)
             {
                 return RedirectToAction(nameof(Index));
             }

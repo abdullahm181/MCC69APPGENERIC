@@ -11,6 +11,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authentication;
+using MCC69APP.Repositories.Data;
 
 namespace MCC69APP
 {
@@ -26,8 +29,21 @@ namespace MCC69APP
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpContextAccessor();
+            services.AddScoped<LevelRepository>();
+            services.AddScoped<RoleRepository>();
+            services.AddScoped<UserRoleRepository>();
+            services.AddScoped<UserRepository>();
+            services.AddScoped<JobsRepository>();
+            services.AddScoped<JobHistoriesRepository>();
+            services.AddScoped<EmployeesRepository>();
+            services.AddScoped<DepartmentsRepository>();
+            services.AddScoped<LocationsRepository>();
+            services.AddScoped<CountriesRepository>();
+            services.AddScoped<RegionsRepository>();
             services.AddControllersWithViews();
-            services.AddDbContext<MyContext>(options => options.UseSqlServer(Configuration.GetConnectionString("connection")));
+            //services.AddDbContext<MyContext>(options => options.UseSqlServer(Configuration.GetConnectionString("connection")));
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddDistributedMemoryCache();
             services.AddSession(options => {
                 options.IdleTimeout = TimeSpan.FromMinutes(5);//You can set Time   
@@ -51,10 +67,36 @@ namespace MCC69APP
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
+
             app.UseRouting();
 
-            app.UseAuthorization();
             app.UseSession();
+
+            /* app.Use(async (context, next) => {
+                 var token = context.Session.GetString("Token");
+                 if (!string.IsNullOrEmpty(token))
+                 {
+                     context.Request.Headers.Add("Authorization", "Bearer " + token.ToString());
+                 }
+                 await next();
+             });*/
+            app.Use(async (HttpContext context, Func<Task> next) =>
+            {
+                var token = context.Session.GetString("Token");
+                if (!string.IsNullOrEmpty(token))
+                {
+                    context.Request.Headers.Add("Authorization", "Bearer " + token.ToString());
+                }
+                
+                await next();
+                
+            });
+            app.UseAuthentication();
+            
+            app.UseAuthorization();
+            
+            
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

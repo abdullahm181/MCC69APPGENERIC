@@ -1,28 +1,29 @@
-﻿using MCC69APP.Context;
+﻿using MCC69APP.Base;
+using MCC69APP.Context;
 using MCC69APP.Models;
+using MCC69APP.Repositories.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace MCC69APP.Controllers
 {
-    public class LocationsController : Controller
+    public class LocationsController : BaseController<Locations,LocationsRepository>
     {
-        HttpAPi<Locations> httpAPI;
-        HttpAPi<Countries> httpAPICountries;
-        public LocationsController(MyContext myContext)
+        CountriesRepository countriesRepository;
+        public LocationsController(LocationsRepository locationsRepository,CountriesRepository countriesRepository):base(locationsRepository)
         {
-            this.httpAPI = new HttpAPi<Locations>("Locations");
-            this.httpAPICountries = new HttpAPi<Countries>("Countries");
+            this.countriesRepository = countriesRepository;
         }
         public IActionResult Index()
         {
-            IEnumerable<Locations> locations = null;
-            locations = httpAPI.Get();
+            
+            var locations = Get();
 
             if (locations == Enumerable.Empty<Countries>())
             {
@@ -30,15 +31,15 @@ namespace MCC69APP.Controllers
             }
             return View(locations);
         }
-        public IActionResult Details(int? id)
+        public IActionResult Details(int id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            Locations locations = null;
-            locations = httpAPI.Get(id);
+            
+            var locations = Get(id);
             if (locations == null)
             {
                 ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
@@ -48,10 +49,7 @@ namespace MCC69APP.Controllers
         }
         public IActionResult Create()
         {
-            IEnumerable<Countries> countries = null;
-            countries = httpAPICountries.Get();
-
-            ViewData["Country_Id"] = new SelectList(countries, "Id", "Name");
+            ViewData["Country_Id"] = new SelectList(countriesRepository.Get(), "Id", "Name");
             return View();
         }
 
@@ -60,8 +58,8 @@ namespace MCC69APP.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create([Bind("Id,StreetAddress,PostalCode,City,Country_Id")] Locations locations)
         {
-            string result = httpAPI.Create(locations);
-            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            var result = Post(locations);
+            if (result == HttpStatusCode.OK)
             {
                 return RedirectToAction(nameof(Index));
             }
@@ -76,16 +74,14 @@ namespace MCC69APP.Controllers
                 return NotFound();
             }
 
-            Locations locations = null;
-            locations = httpAPI.Get(id);
+            var locations = Get(id);
             if (locations == null)
             {
                 ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
             }
-            IEnumerable<Countries> countries = null;
-            countries = httpAPICountries.Get();
+           
 
-            ViewBag.Countries = new SelectList(countries, "Id", "Name", locations.Country_Id);
+            ViewBag.Countries = new SelectList(countriesRepository.Get(), "Id", "Name", locations.Country_Id);
            
             return View(locations);
         }
@@ -93,23 +89,23 @@ namespace MCC69APP.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Locations locations)
         {
-            string result = httpAPI.Edit(locations);
-            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            var result = Put(locations);
+            if (result == HttpStatusCode.OK)
             {
                 return RedirectToAction(nameof(Index));
             }
             return View(locations);
         }
 
-        public IActionResult Delete(int? id)
+        public IActionResult Delete(int id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            Locations locations = null;
-            locations = httpAPI.Get(id);
+           
+            var locations = Get(id);
             if (locations == null)
             {
                 ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
@@ -124,8 +120,8 @@ namespace MCC69APP.Controllers
         public IActionResult Delete(Locations locations)
         {
 
-            string result = httpAPI.Delete(locations);
-            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            var result = DeleteEntity(locations);
+            if (result == HttpStatusCode.OK)
             {
                 return RedirectToAction(nameof(Index));
             }

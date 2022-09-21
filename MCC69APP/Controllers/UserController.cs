@@ -5,15 +5,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using MCC69APP.Repositories.Data;
+using MCC69APP.Base;
 
 namespace MCC69APP.Controllers
 {
-    public class UserController : Controller
+    public class UserController : BaseController<User, UserRepository>
     {
-        HttpAPi<User> httpAPI;
-        public UserController()
+       
+        public UserController(UserRepository userRepository):base(userRepository)
         {
-            httpAPI = new HttpAPi<User>("User");
+            
             
         }
         public IActionResult Index()
@@ -22,8 +24,8 @@ namespace MCC69APP.Controllers
             {
                 return View("UnAuthorize");
             }
-            string token = HttpContext.Session.GetString("Token");
-            var user = httpAPI.Get(token);
+            //string token = HttpContext.Session.GetString("Token");
+            var user = Get();
 
             if (user == Enumerable.Empty<Countries>())
             {

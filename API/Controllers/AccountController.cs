@@ -28,19 +28,22 @@ namespace API.Controllers
         }
         [AllowAnonymous]
         [HttpPost("Login")]
-        public IActionResult Login(User user)
+        public IActionResult Login(Login login)
         {
-            if (string.IsNullOrEmpty(user.UserName) || string.IsNullOrEmpty(user.Password))
+            if (string.IsNullOrEmpty(login.Username) || string.IsNullOrEmpty(login.Password))
                 return BadRequest(new { message = "Username or password is blank" });
-            var result = accountRepository.Login(user.UserName, user.Password);
+            var result = accountRepository.Login(login.Username, login.Password);
             if (result == null)
                 return BadRequest(new { message = "Username or password is incorrect" });
             var userRole = accountRepository.GetRoleById(result.Id);
             var jwt = new JwtService(iconfiguration);
-            var tokenString = jwt.GenerateSecurityToken(
-                result.Id, result.Employees.Email,
-                result.Employees.FirstName + " " + result.Employees.LastName,
-                userRole.Role.Name);
+            Account account = new Account { 
+                Id=result.Id,
+                FullName= result.Employees.FirstName + " " + result.Employees.LastName,
+                Email= result.Employees.Email,
+                Role= userRole.Role.Name
+            };
+            var tokenString = jwt.GenerateToken(account);
 
             return Ok(new { result = 200, message = "successfully Login", Token = tokenString });
         }

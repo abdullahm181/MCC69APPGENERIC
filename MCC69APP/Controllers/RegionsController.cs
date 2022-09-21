@@ -12,22 +12,25 @@ using System.Net.Http.Headers;
 using Newtonsoft.Json;
 
 using Newtonsoft.Json.Linq;
+using MCC69APP.Repositories.Data;
+using MCC69APP.Base;
+using System.Net;
 
 namespace MCC69APP.Controllers
 {
-    public class RegionsController : Controller
+    public class RegionsController : BaseController<Regions, RegionsRepository>
     {
-        HttpAPi<Regions> httpAPI;
-        public RegionsController()
+        
+        public RegionsController(RegionsRepository regionsRepository):base(regionsRepository)
         {
-            this.httpAPI = new HttpAPi<Regions>("Regions");
+            
         }
         // GET ALL
         
         public IActionResult Index()
         {
-            IEnumerable<Regions> regions = null;
-            regions = httpAPI.Get();
+            
+            var regions = Get();
 
             if (regions == Enumerable.Empty<Regions>())
             {
@@ -38,15 +41,14 @@ namespace MCC69APP.Controllers
         }
         // GET By ID
 
-        public IActionResult Details(int? id)
+        public IActionResult Details(int id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            Regions regions = null;
-            regions = httpAPI.Get(id);
+            var regions = Get(id);
             if (regions == null) {
                 ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
             }
@@ -63,8 +65,7 @@ namespace MCC69APP.Controllers
                 return NotFound();
             }
 
-            Regions regions = null;
-            regions = httpAPI.Get(id);
+            var regions = Get(id);
             if (regions == null)
             {
                 ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
@@ -76,8 +77,9 @@ namespace MCC69APP.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Regions regions)
         {
-            string result = httpAPI.Edit(regions);
-            if (!string.IsNullOrWhiteSpace(result)&& result=="200") {
+            var result = Put(regions);
+            if (result == HttpStatusCode.OK) 
+            {
                 return RedirectToAction(nameof(Index));
             }
             return View(regions);
@@ -91,8 +93,8 @@ namespace MCC69APP.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(Regions regions)
         {
-            string result = httpAPI.Create(regions);
-            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            var result = Post(regions);
+            if (result == HttpStatusCode.OK)
             {
                 return RedirectToAction(nameof(Index));
             }
@@ -109,8 +111,8 @@ namespace MCC69APP.Controllers
                 return NotFound();
             }
 
-            Regions regions = null;
-            regions = httpAPI.Get(id);
+            
+            var regions = Get(id);
             if (regions == null)
             {
                 ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
@@ -122,8 +124,8 @@ namespace MCC69APP.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Delete(Regions regions)
         {
-            string result = httpAPI.Delete(regions);
-            if (!string.IsNullOrWhiteSpace(result) && result == "200")
+            var result = DeleteEntity(regions);
+            if (result == HttpStatusCode.OK)
             {
                 return RedirectToAction(nameof(Index));
             }
