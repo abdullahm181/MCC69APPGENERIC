@@ -69,11 +69,11 @@ namespace MCC69APP.Controllers
 
             return View(employees);
         }
-        public IActionResult Edit(int id)
+        public JsonResult Edit(int id)
         {
             if (id == null)
             {
-                return NotFound();
+                return Json(null);
             }
 
 
@@ -87,7 +87,7 @@ namespace MCC69APP.Controllers
             ViewData["Department_Id"] = new SelectList(departmentsRepository.Get(), "Id", "Id", employees.Department_Id);
             ViewData["Job_Id"] = new SelectList(jobsRepository.Get(), "Id", "Id", employees.Job_Id);
             ViewData["Manager_Id"] = new SelectList(Get(), "Id", "Id", employees.Manager_Id);
-            return View(employees);
+            return Json(employees);
         }
 
         [HttpPost]
