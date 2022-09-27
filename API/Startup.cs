@@ -120,7 +120,7 @@ namespace API
             });
             //services.AddSession();
             services.AddCors(option => option.AddPolicy("DefaultPolicy", builder => {
-                builder.WithOrigins("https://localhost:44305").WithMethods("GET","POST","PUT","DELETE").WithExposedHeaders("Authorization");
+                builder.WithOrigins("https://localhost:44305", "http://127.0.0.1:5500").WithMethods("GET","POST","PUT","DELETE");
             }));
         }
 
