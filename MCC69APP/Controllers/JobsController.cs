@@ -22,7 +22,7 @@ namespace MCC69APP.Controllers
         }
         public IActionResult Index()
         {
-            var jobs = Get();
+            var jobs = GetAll();
 
             if (jobs == Enumerable.Empty<Countries>())
             {
@@ -30,99 +30,7 @@ namespace MCC69APP.Controllers
             }
             return View(jobs);
         }
-        public IActionResult Details(int id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-
-            var jobs = Get(id);
-            if (jobs == null)
-            {
-                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
-            }
-
-            return View(jobs);
-        }
-        public IActionResult Create()
-        {
-            return View();
-        }
-
         
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Create([Bind("Id,JobTitle,MinSalary,MaxSalary")] Jobs jobs)
-        {
-            var result =Post(jobs);
-            if (result == HttpStatusCode.OK)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-
-            return View(jobs);
-        }
-
-        public IActionResult Edit(int id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-
-            var jobs = Get(id);
-            if (jobs == null)
-            {
-                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
-            }
-
-            return View(jobs);
-        }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Edit([Bind("Id,JobTitle,MinSalary,MaxSalary")] Jobs jobs)
-        {
-            var result = Put(jobs);
-            if (result == HttpStatusCode.OK)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            return View(jobs);
-        }
-        public IActionResult Delete(int id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-
-            var jobs = Get(id);
-            if (jobs == null)
-            {
-                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
-            }
-
-            return View(jobs);
-        }
-
-        // POST: Jobs/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Delete(Jobs jobs)
-        {
-            var result = DeleteEntity(jobs);
-            if (result == HttpStatusCode.OK)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-
-            return View(jobs);
-
-        }
        
     }
 }

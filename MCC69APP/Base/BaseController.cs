@@ -7,6 +7,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Net;
 
+using Microsoft.AspNetCore.Http;
+using System.Net.Http;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Routing;
+
 namespace MCC69APP.Base
 
 {
@@ -15,44 +20,52 @@ namespace MCC69APP.Base
            where TRepository : IGeneralRepository<TEntity>
     {
         TRepository repository;
+        //private readonly IHttpContextAccessor _contextAccessor;
 
         public BaseController(TRepository repository)
         {
+            /*_contextAccessor = new HttpContextAccessor();
+            if (_contextAccessor.HttpContext.Session.GetString("Token") == null)
+            {
+                RedirectToAction("index", "Home").ExecuteResult(this.ControllerContext);
+            };*/
             this.repository = repository;
         }
         [HttpGet]
-        public IEnumerable<TEntity> Get()
+        public JsonResult GetAll()
         {
-            var result = repository.Get();
-            return result;
+            var result = repository.Get();  
+            return Json(result) ;
         }
 
         [HttpGet]
-        public TEntity Get(int id)
+        public JsonResult Get(int id)
         {
             var result = repository.Get(id);
-            return result;
+            return Json(result);
         }
 
         [HttpPost]
-        public HttpStatusCode Post(TEntity entity)
+        public JsonResult Post(TEntity entity)
         {
             var result = repository.Post(entity);
-            return result;
+            return Json(result);
         }
 
         [HttpPut]
-        public HttpStatusCode Put(TEntity entity)
+        public JsonResult Put(TEntity entity)
         {
             var result = repository.Put(entity);
-            return result;
+            return Json(result);
         }
 
         [HttpDelete]
-        public HttpStatusCode DeleteEntity(TEntity entity)
+        public JsonResult DeleteEntity(TEntity entity)
         {
             var result = repository.Delete(entity.Id);
-            return result;
+            return Json(result);
         }
+        
     }
+   
 }
