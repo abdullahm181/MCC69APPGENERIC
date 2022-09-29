@@ -1,16 +1,4 @@
-﻿@using Microsoft.AspNetCore.Http
-@inject IHttpContextAccessor HttpContextAccessor
-@{
-    //
-    if (@HttpContextAccessor.HttpContext.Session.GetString("Token")!=null)
-    {
-        Layout = "_AdminLayout";
-        //Layout = "_Layout";
-    }
-    else
-    {
-        Layout = "_HomePage";
-
-    }
-
+﻿@{
+    //Layout = "_Layout";
+    Layout = "_AdminLayout";
 }

@@ -25,7 +25,7 @@ namespace MCC69APP.Controllers
                 return View("UnAuthorize");
             }
             //string token = HttpContext.Session.GetString("Token");
-            var user = GetAll();
+            var user = Get();
 
             if (user == Enumerable.Empty<Countries>())
             {

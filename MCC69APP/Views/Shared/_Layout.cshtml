@@ -1,35 +1,7 @@
-﻿
-@using Microsoft.AspNetCore.Http
-@inject IHttpContextAccessor HttpContextAccessor
-@{
-    var token = @HttpContextAccessor.HttpContext.Session.GetString("Token");
-    if (token==null) {
-        token = "Logout";
-    }
-    //
-
-}
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <script>
-        //session end
-        let Token = "";
-        Token=Token+"@token";
-        //console.log(window.location.pathname);
-        if (window.location.pathname != "/account") {
-            if (Token == "Logout") {
-                SessionEnd();
-            }
-        }
-
-        function SessionEnd() {
-            console.log("masuk logout");
-            window.location = "/Account/Logout";
-        }
-    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - MCC69APP</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
@@ -92,7 +64,6 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    
     @RenderSection("Scripts", required: false)
 </body>
 </html>

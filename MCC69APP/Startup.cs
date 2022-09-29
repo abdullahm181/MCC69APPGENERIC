@@ -72,16 +72,15 @@ namespace MCC69APP
 
             app.UseSession();
 
-           /* app.Use(async (context, next) =>
-            {
-                var token = context.Session.GetString("Token");
-                if (!string.IsNullOrEmpty(token))
-                {
-                    RedirectToAction("index", "Home");
-                }
-                await next();
-            });*/
-            /*app.Use(async (HttpContext context, Func<Task> next) =>
+            /* app.Use(async (context, next) => {
+                 var token = context.Session.GetString("Token");
+                 if (!string.IsNullOrEmpty(token))
+                 {
+                     context.Request.Headers.Add("Authorization", "Bearer " + token.ToString());
+                 }
+                 await next();
+             });*/
+            app.Use(async (HttpContext context, Func<Task> next) =>
             {
                 var token = context.Session.GetString("Token");
                 if (!string.IsNullOrEmpty(token))
@@ -91,7 +90,7 @@ namespace MCC69APP
                 
                 await next();
                 
-            });*/
+            });
             app.UseAuthentication();
             
             app.UseAuthorization();

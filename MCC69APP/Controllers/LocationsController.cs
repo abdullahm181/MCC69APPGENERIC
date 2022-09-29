@@ -23,7 +23,7 @@ namespace MCC69APP.Controllers
         public IActionResult Index()
         {
             
-            var locations = GetAll();
+            var locations = Get();
 
             if (locations == Enumerable.Empty<Countries>())
             {
@@ -31,7 +31,103 @@ namespace MCC69APP.Controllers
             }
             return View(locations);
         }
+        public IActionResult Details(int id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            
+            var locations = Get(id);
+            if (locations == null)
+            {
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+            }
+
+            return View(locations);
+        }
+        public IActionResult Create()
+        {
+            ViewData["Country_Id"] = new SelectList(countriesRepository.Get(), "Id", "Name");
+            return View();
+        }
+
         
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create([Bind("Id,StreetAddress,PostalCode,City,Country_Id")] Locations locations)
+        {
+            var result = Post(locations);
+            if (result == HttpStatusCode.OK)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(locations);
+        }
+
+        public IActionResult Edit(int id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var locations = Get(id);
+            if (locations == null)
+            {
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+            }
+           
+
+            ViewBag.Countries = new SelectList(countriesRepository.Get(), "Id", "Name", locations.Country_Id);
+           
+            return View(locations);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(Locations locations)
+        {
+            var result = Put(locations);
+            if (result == HttpStatusCode.OK)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            return View(locations);
+        }
+
+        public IActionResult Delete(int id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+           
+            var locations = Get(id);
+            if (locations == null)
+            {
+                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+            }
+
+            return View(locations);
+        }
+
+        // POST: Locations/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Delete(Locations locations)
+        {
+
+            var result = DeleteEntity(locations);
+            if (result == HttpStatusCode.OK)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(locations);
+        }
        
     }
 }
