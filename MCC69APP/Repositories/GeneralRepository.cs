@@ -31,7 +31,7 @@ namespace MCC69APP.Repositories
                 BaseAddress = new Uri(address)
             };
             
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _contextAccessor.HttpContext.Session.GetString("Token"));
+            //httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _contextAccessor.HttpContext.Session.GetString("Token"));
         }
 
         public HttpStatusCode Delete(int id)
@@ -39,7 +39,7 @@ namespace MCC69APP.Repositories
             var result = httpClient.DeleteAsync(request + id).Result;
             return result.StatusCode;
         }
-
+        
         public IEnumerable<Entity> Get()
         {
             IEnumerable<Entity> entity = null;

@@ -2,6 +2,7 @@
 using MCC69APP.Context;
 using MCC69APP.Models;
 using MCC69APP.Repositories.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace MCC69APP.Controllers
 {
+    
     public class EmployeesController : BaseController<Employees, EmployeesRepository>
     {
         DepartmentsRepository departmentsRepository;

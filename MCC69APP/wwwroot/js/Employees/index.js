@@ -63,21 +63,13 @@ function Create() {
     $("#ModalBody").html(text);
 };
 
-function Edit(id) {
-    console.log("Test masuk edit")
-    
-    
-    
-    let employeeDetail=$.ajax({
-        type: 'GET',
-        url: `/Employees/Get`,
-        data: {
-            id: id,
+async function Edit(id) {
 
-        },
-    }).done(resultEmployee => {
-        let text = "";
-        text = `
+    let employeeDetail = await Get("Employees", {
+        "id": id
+    });
+    let text = "";
+    text = `
         <div class="addselection">
             <div class="row">
                         <div class="col">
@@ -86,48 +78,48 @@ function Edit(id) {
                                 <input type="hidden" asp-for="Id" />
                                 <div class="form-group">
                                     <label asp-for="FirstName" class="control-label"></label>
-                                    <input asp-for="FirstName" class="form-control" value="${resultEmployee.firstName}" />
+                                    <input asp-for="FirstName" class="form-control" name="FirstName" value="${employeeDetail.firstName}" />
                                     <span asp-validation-for="FirstName" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
                                     <label asp-for="LastName" class="control-label"></label>
-                                    <input asp-for="LastName" class="form-control" value="${resultEmployee.lastName}"/>
+                                    <input asp-for="LastName" class="form-control" name="LastName" value="${employeeDetail.lastName}"/>
                                     <span asp-validation-for="LastName" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
                                     <label asp-for="Email" class="control-label"></label>
-                                    <input asp-for="Email" class="form-control" value="${resultEmployee.email}"/>
+                                    <input asp-for="Email" class="form-control" name="Email" value="${employeeDetail.email}"/>
                                     <span asp-validation-for="Email" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
                                     <label asp-for="PhoneNumber" class="control-label"></label>
-                                    <input asp-for="PhoneNumber" class="form-control" value="${resultEmployee.phoneNumber}"/>
+                                    <input asp-for="PhoneNumber" class="form-control" name="PhoneNumber" value="${employeeDetail.phoneNumber}"/>
                                     <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
                                     <label asp-for="HireDate" class="control-label"></label>
-                                    <input asp-for="HireDate" class="form-control" value="${resultEmployee.hireDate}"/>
+                                    <input asp-for="HireDate" class="form-control" name="HireDate" value="${employeeDetail.hireDate}"/>
                                     <span asp-validation-for="HireDate" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
                                     <label asp-for="Salary" class="control-label"></label>
-                                    <input asp-for="Salary" class="form-control" value="${resultEmployee.salary}"/>
+                                    <input asp-for="Salary" class="form-control" name="Salary" value="${employeeDetail.salary}"/>
                                     <span asp-validation-for="Salary" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
                                     <label asp-for="Job_Id" class="control-label"></label>
                                     
-                                    <select asp-for="Job_Id" class="form-control" asp-items="ViewBag.Job_Id" id="JobEdit"></select>
+                                    <select asp-for="Job_Id" class="form-control" asp-items="ViewBag.Job_Id" name="Job_Id" id="JobEdit"></select>
                                     <span asp-validation-for="Job_Id" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
                                     <label asp-for="Manager_Id" class="control-label"></label>
-                                    <select asp-for="Manager_Id" class="form-control" asp-items="ViewBag.Manager_Id"></select>
+                                    <select asp-for="Manager_Id" class="form-control" asp-items="ViewBag.Manager_Id" name="Manager_Id" id="EmployeesEdit"></select>
                                     <span asp-validation-for="Manager_Id" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
                                     <label asp-for="Department_Id" class="control-label"></label>
-                                    <select asp-for="Department_Id" class="form-control" asp-items="ViewBag.Department_Id"></select>
+                                    <select asp-for="Department_Id" class="form-control" asp-items="ViewBag.Department_Id" name="Department_Id" id="DepartmentsEdit"></select>
                                     <span asp-validation-for="Department_Id" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
@@ -138,36 +130,46 @@ function Edit(id) {
                     </div>
         </div
         
-    `;
-        //console.log(GetAll("Jobs"));
-        const res = $.ajax({
-            type: 'GET',
-            url: `/Jobs/GetAll`,
+    `
 
-        }).done(result => {
+    $("#ModalEmployeeTitle").text("Edit");
+    $("#ModalBody").html(text);
+    const Jobs = await GetAll("Jobs");
+    $("#JobEdit").empty()
+    $.each(Jobs, function () {
+        if (this.id == employeeDetail.job_Id) {
+            $('#JobEdit').append(`<option value="${this.id}" selected="selected">${this.jobTitle}</option>`);
+        }
+        else {
+            $("#JobEdit").append($("<option />").val(this.id).text(this.jobTitle));
+        }
 
-        }).fail((error) => {
-            console.log(error);
-        });
-        const Jobs = GetAll("Jobs");
-        console.log(res);
-        $("#JobEdit").empty()
-        $.each(Jobs, function () {
-            if (this.id == resultEmployee.id) {
-                $('#JobEdit').append(`<option value="${this.id}" selected="selected">${this.jobTitle}</option>`);
-            }
-            else {
-                $("#JobEdit").append($("<option />").val(this.id).text(this.jobTitle));
-            }
+    });
+    const Employees = await GetAll("Employees");
+    $("#EmployeesEdit").empty()
+    $.each(Employees, function () {
+        if (this.id == employeeDetail.manager_Id) {
+            $('#EmployeesEdit').append(`<option value="${this.id}" selected="selected">${this.firstName} ${this.lastName}</option>`);
+        }
+        else {
+            $("#EmployeesEdit").append($("<option />").val(this.id).text(`${this.firstName} ${this.lastName}`));
+        }
 
-        });
-        $("#ModalEmployeeTitle").text("Edit");
-        $("#ModalBody").html(text);
-    }).fail((error) => {
-        console.log(error);
-    });;
-    //let viewbag = @Html.Raw(Json.Serialize(employeeDetail.result));
-    //$("#pokeStrengths").html(textStrengths);
+    });
+    const Departments = await GetAll("Departments");
+    $("#DepartmentsEdit").empty()
+    $.each(Departments, function () {
+        if (this.id == employeeDetail.department_Id) {
+            $('#DepartmentsEdit').append(`<option value="${this.id}" selected="selected">${this.name}</option>`);
+        }
+        else {
+            $("#DepartmentsEdit").append($("<option />").val(this.id).text(this.name));
+        }
+
+    });
+    var data = {};
+    $('#Edit').serializeArray().map(function (x) { data[x.name] = x.value; });
+    console.log(data);
     
 };
 function Detail(id) {
@@ -294,7 +296,10 @@ function Delete(id) {
 };
 
 $(document).ready(function () {
-   
+    $('.CreateBtn').click(function () {
+        var url = '/Employees/Create';
+        $('#Create').load(url);
+    });
     $('#tEmployees').DataTable({
 
         dom: "<'row'<'col'l><'col'B><'col'f>>"

@@ -1,19 +1,13 @@
-using MCC69APP.Context;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using MCC69APP.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authentication;
 using MCC69APP.Repositories.Data;
+using API.Middleware;
 
 namespace MCC69APP
 {
@@ -29,7 +23,12 @@ namespace MCC69APP
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSession(options => {
+                options.IdleTimeout = TimeSpan.FromMinutes(5);//You can set Time   
+            });
             services.AddHttpContextAccessor();
+            services.JWTConfigure(Configuration);
+            
             services.AddScoped<LevelRepository>();
             services.AddScoped<RoleRepository>();
             services.AddScoped<UserRoleRepository>();
@@ -41,13 +40,18 @@ namespace MCC69APP
             services.AddScoped<LocationsRepository>();
             services.AddScoped<CountriesRepository>();
             services.AddScoped<RegionsRepository>();
+            //services.AddScoped<API.Repositories.Data.AccountRepository>();
+
             services.AddControllersWithViews();
             //services.AddDbContext<MyContext>(options => options.UseSqlServer(Configuration.GetConnectionString("connection")));
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddDistributedMemoryCache();
-            services.AddSession(options => {
-                options.IdleTimeout = TimeSpan.FromMinutes(5);//You can set Time   
-            });
+            
+            /*services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            });*/
             //services.AddMvc();
         }
 
@@ -72,26 +76,26 @@ namespace MCC69APP
 
             app.UseSession();
 
-           /* app.Use(async (context, next) =>
-            {
-                var token = context.Session.GetString("Token");
-                if (!string.IsNullOrEmpty(token))
-                {
-                    RedirectToAction("index", "Home");
-                }
-                await next();
-            });*/
-            /*app.Use(async (HttpContext context, Func<Task> next) =>
+            /* app.Use(async (context, next) =>
+             {
+                 var token = context.Session.GetString("Token");
+                 if (!string.IsNullOrEmpty(token))
+                 {
+                     RedirectToAction("index", "Home");
+                 }
+                 await next();
+             });*/
+            app.Use(async (context, next) =>
             {
                 var token = context.Session.GetString("Token");
                 if (!string.IsNullOrEmpty(token))
                 {
                     context.Request.Headers.Add("Authorization", "Bearer " + token.ToString());
                 }
-                
+
                 await next();
-                
-            });*/
+
+            });
             app.UseAuthentication();
             
             app.UseAuthorization();
