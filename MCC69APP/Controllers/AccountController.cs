@@ -37,7 +37,7 @@ namespace MCC69APP.Controllers
                 {
                     //client.DefaultRequestHeaders.Authorization= new AuthenticationHeaderValue("Bearer", "Your Oauth token");
                    
-
+                    //test
                     client.BaseAddress = new Uri(Baseurl + "Account/Login");
 
                     //HTTP POST
@@ -73,7 +73,17 @@ namespace MCC69APP.Controllers
         public IActionResult Logout()
         {
             HttpContext.Session.Remove("Token");
+            HttpContext.Session.Clear();
             return RedirectToAction("Index");
         }
+
+        [Route("register")]
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View("Register");
+        }
+
+
     }
 }

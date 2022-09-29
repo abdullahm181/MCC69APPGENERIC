@@ -23,7 +23,7 @@ namespace MCC69APP.Controllers
         public IActionResult Index()
         {
 
-            var departments = Get();
+            var departments = GetAll();
 
             if (departments == Enumerable.Empty<Countries>())
             {
@@ -31,102 +31,7 @@ namespace MCC69APP.Controllers
             }
             return View(departments);
         }
-        public IActionResult Details(int id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-
-            var departments = Get(id);
-            if (departments == null)
-            {
-                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
-            }
-
-            return View(departments);
-        }
-        public IActionResult Create()
-        {
-            
-            ViewBag.Locations = new SelectList(locationsRepository.Get(), "Id", "StreetAddress");
-            
-            return View();
-        }
-
         
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Create([Bind("Id,Name,Manager_Id,Location_Id")] Departments departments)
-        {
-            var result = Post(departments);
-            if (result == HttpStatusCode.OK)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-
-            return View(departments);
-        }
-        public IActionResult Edit(int id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-
-            var departments = Get(id);
-            if (departments == null)
-            {
-                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
-            }
-            ViewBag.Location_Id= new SelectList(locationsRepository.Get(), "Id", "StreetAddress", departments.Location_Id);
-            return View(departments); ;
-        }
-
-        
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Edit([Bind("Id,Name,Manager_Id,Location_Id")] Departments departments)
-        {
-            var result = Put(departments);
-            if (result == HttpStatusCode.OK)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            return View(departments);
-        }
-        public IActionResult Delete(int id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-
-            var departments = Get(id);
-            if (departments == null)
-            {
-                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
-            }
-
-            return View(departments); ;
-        }
-
-        // POST: Departments/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Delete(Departments departments)
-        {
-            var result = DeleteEntity(departments);
-            if (result == HttpStatusCode.OK)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-
-            return View(departments);
-        }
         
     }
 }

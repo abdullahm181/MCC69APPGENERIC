@@ -14,6 +14,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authentication;
 using MCC69APP.Repositories.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
 
 namespace MCC69APP
 {
@@ -29,7 +32,33 @@ namespace MCC69APP
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSession(options => {
+                options.IdleTimeout = TimeSpan.FromMinutes(5);//You can set Time   
+            });
             services.AddHttpContextAccessor();
+            services.AddAuthentication(x =>
+             {
+                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                 x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+             }).AddJwtBearer(o =>
+             {
+                 o.RequireHttpsMetadata = false;
+                 var Key = Encoding.UTF8.GetBytes(Configuration["JWT:Key"]);
+                 o.SaveToken = true;
+                 o.TokenValidationParameters = new TokenValidationParameters
+                 {
+                     ValidateIssuer = false,
+                     ValidateAudience = false,
+                     ValidateLifetime = true,
+                     ValidateIssuerSigningKey = true,
+                     ValidIssuer = Configuration["JWT:Issuer"],
+                     ValidAudience = Configuration["JWT:Audience"],
+                     IssuerSigningKey = new SymmetricSecurityKey(Key),
+                     ClockSkew = TimeSpan.Zero
+                 };
+
+             });
+
             services.AddScoped<LevelRepository>();
             services.AddScoped<RoleRepository>();
             services.AddScoped<UserRoleRepository>();
@@ -45,9 +74,7 @@ namespace MCC69APP
             //services.AddDbContext<MyContext>(options => options.UseSqlServer(Configuration.GetConnectionString("connection")));
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddDistributedMemoryCache();
-            services.AddSession(options => {
-                options.IdleTimeout = TimeSpan.FromMinutes(5);//You can set Time   
-            });
+            
             //services.AddMvc();
         }
 
