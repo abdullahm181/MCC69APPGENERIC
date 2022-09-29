@@ -1,6 +1,6 @@
 ﻿$(document).ready(function () {
     // Example starter JavaScript for disabling form submissions if there are invalid fields
-    /*(function () {
+    (function () {
         'use strict'
 
         // Fetch all the forms we want to apply custom Bootstrap validation styles to
@@ -22,7 +22,15 @@
                     form.classList.add('was-validated')
                 }, false)
             })
-        
-    })()*/
-    
+        $("#contact-form").on("submit", function (e) {
+            // if the validator does not prevent form submit
+            if (!e.isDefaultPrevented()) {
+                swal(
+                    'Success',
+                    'You clicked the <b style="color:green;">Success</b> button!',
+                    'success'
+                )
+            }
+        });
+    })()
 });

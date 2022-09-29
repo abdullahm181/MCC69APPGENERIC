@@ -14,27 +14,21 @@
         <div class="card-body login-card-body">
             <p class="login-box-msg">Sign in to start your session</p>
 
-            <form method="post" asp-controller="account" asp-action="Login" class="needs-validation" id="LoginForm" novalidate>
+            <form method="post" asp-controller="account" asp-action="Login">
                 <div class="input-group mb-3">
-                    <input class="form-control" type="text" name="username" placeholder="Username" required>
+                    <input class="form-control" type="text" name="username" placeholder="Username">
                     <div class="input-group-append">
                         <div class="input-group-text">
                             <span class="fas fa-envelope"></span>
                         </div>
                     </div>
-                    <div class="invalid-feedback">
-                        Harap isi Username
-                    </div>
                 </div>
                 <div class="input-group mb-3">
-                    <input class="form-control" type="password" name="password" placeholder="Password" required>
+                    <input class="form-control" type="password" name="password" placeholder="Password">
                     <div class="input-group-append">
                         <div class="input-group-text">
                             <span class="fas fa-lock"></span>
                         </div>
-                    </div></input>
-                    <div class="invalid-feedback">
-                        harap isi Password
                     </div>
                 </div>
                 <div class="row">
