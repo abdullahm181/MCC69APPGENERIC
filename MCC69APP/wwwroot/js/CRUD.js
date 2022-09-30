@@ -105,7 +105,7 @@ function confirmDelete(IdDataTable, ControllerName, IdData = null) {
         ) {
             swal("Cancelled", "Your imaginary file is safe :)", "error");
         }*/
-        swall.closeModal();
+        //swall.closeModal();
     });
 };
 /*module.exports = {

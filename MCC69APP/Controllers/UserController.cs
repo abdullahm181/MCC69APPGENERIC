@@ -20,18 +20,8 @@ namespace MCC69APP.Controllers
         }
         public IActionResult Index()
         {
-            if (string.IsNullOrEmpty(HttpContext.Session.GetString("Token")))
-            {
-                return View("UnAuthorize");
-            }
-            //string token = HttpContext.Session.GetString("Token");
-            var user = GetAll();
-
-            if (user == Enumerable.Empty<Countries>())
-            {
-                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
-            }
-            return View(user);
+           
+            return View();
         }
         public IActionResult UnAuthorize() {
             return View();

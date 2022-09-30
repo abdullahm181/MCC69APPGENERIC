@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -53,11 +54,21 @@ namespace MCC69APP.Controllers
                         JObject rss = JObject.Parse(ResultJsonString.Result);
 
                         token = rss.SelectToken("token").Value<string>();
+
+                        var tokenHandler = new JwtSecurityTokenHandler();
+                        JwtSecurityToken DecodeToken = tokenHandler.ReadJwtToken(token);
+                        var NameToken=DecodeToken.Claims.FirstOrDefault(claim => claim.Type.Equals("unique_name")).Value;
+                        var RoleToken = DecodeToken.Claims.FirstOrDefault(claim => claim.Type.Equals("role")).Value;
+                        var ExpToken = DecodeToken.Claims.FirstOrDefault(claim => claim.Type.Equals("exp")).Value;
+                        HttpContext.Session.SetString("Token", token.ToString());
+                        HttpContext.Session.SetString("Name", NameToken.ToString());
+                        HttpContext.Session.SetString("Role", RoleToken.ToString());
+                        HttpContext.Session.SetString("Exp", ExpToken.ToString());
                     }
                     
                 }
                 //HttpContext.Session.SetString("username", user.UserName);
-                HttpContext.Session.SetString("Token",token.ToString());
+                
                 //HttpContext.Session.Get("username");
                 return View("Success");
             }
