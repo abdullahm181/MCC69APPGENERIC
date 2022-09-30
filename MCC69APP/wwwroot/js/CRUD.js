@@ -63,33 +63,51 @@ const PutOptions = (IdSelec, Object, SelectedId) => {
 
     });
 };
-function confirmDelete(IdDataTable,ControllerName, IdData = null) {
+function confirmDelete(IdDataTable, ControllerName, IdData = null) {
     swal({
-        title: 'Are you sure?',
-        text: "It will permanently deleted !",
-        type: 'warning',
+        title: "Are you sure?",
+        text: "You will not be able to recover this!",
+        type: "warning",
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!'
-    }).then(function (isConfirm) {
-        if (!isConfirm) return;
-        $.ajax({
-            type: 'DELETE',
-            url: `/${ControllerName}/DeleteEntity`,
-            data: {
-                id: IdData
-            },
-            success: function () {
-                $(`#${IdDataTable}`).DataTable().ajax.reload();
-                swal("Done!", "It was succesfully deleted!", "success");
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                swal("Error deleting!", "Please try again", "error");
-            }
-        });
+        confirmButtonColor: "#DD6B55",
+        confirmButtonText: "Yes, delete it!",
+    }).then(result => {
+        if (result.dismiss) {
+            swal("Cancelled", "Your imaginary file is safe :)", "error");
+        }
+        if (result.value) {
+            $.ajax({
+                type: 'DELETE',
+                url: `/${ControllerName}/DeleteEntity`,
+                data: {
+                    id: IdData
+                },
+                success: function () {
+                    $(`#${IdDataTable}`).DataTable().ajax.reload();
+                    swal("Done!", "It was succesfully deleted!", "success");
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    swal("Error deleting!", "Please try again", "error");
+                }
+            });
+
+        }
+        /*
+        swal("Deleted!", "Your file has been deleted.", "success");
+        if (result.value) {
+            $(".post-list")
+                .find(".select-input:checked")
+                .closest(".item")
+                .remove();
+        } else if (
+            // Read more about handling dismissals
+            result.dismiss === swal.DismissReason.cancel
+        ) {
+            swal("Cancelled", "Your imaginary file is safe :)", "error");
+        }*/
+        swall.closeModal();
     });
-}
+};
 /*module.exports = {
     GetAll: GetAll
 };*/

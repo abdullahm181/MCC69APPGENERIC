@@ -29,7 +29,7 @@ async function Create() {
                                 </div>
                                 <div class="form-group">
                                     <label  class="control-label">PhoneNumber</label>
-                                    <input  class="form-control" name="PhoneNumber />
+                                    <input  class="form-control" name="PhoneNumber" />
                                     
                                 </div>
                                 <div class="form-group">
@@ -233,8 +233,10 @@ async function Edit(id) {
     
 };
 async function Detail(id) {
-    //console.log("Test masuk create")
-
+    
+    let employeeDetail = await Get("Employees", {
+        "id": id
+    });
     let text = "";
     text = `
         <dl class="row">
@@ -293,67 +295,6 @@ async function Detail(id) {
     $("#ModalBody").html(text);
 };
 
-async function Delete(id) {
-    //console.log(id);
-
-    let text = "";
-    text = `
-        <div class="row">
-            <div class="col">
-                <form method="POST" action="javascript:void(0);">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    <div class="form-group">
-                        <label asp-for="FirstName" class="control-label"></label>
-                        <input asp-for="FirstName" class="form-control" />
-                        <span asp-validation-for="FirstName" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="LastName" class="control-label"></label>
-                        <input asp-for="LastName" class="form-control" />
-                        <span asp-validation-for="LastName" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="Email" class="control-label"></label>
-                        <input asp-for="Email" class="form-control" />
-                        <span asp-validation-for="Email" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="PhoneNumber" class="control-label"></label>
-                        <input asp-for="PhoneNumber" class="form-control" />
-                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="HireDate" class="control-label"></label>
-                        <input asp-for="HireDate" class="form-control" />
-                        <span asp-validation-for="HireDate" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="Salary" class="control-label"></label>
-                        <input asp-for="Salary" class="form-control" />
-                        <span asp-validation-for="Salary" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="Job_Id" class="control-label"></label>
-                        <select asp-for="Job_Id" class ="form-control" asp-items="ViewBag.Job_Id"></select>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="Manager_Id" class="control-label"></label>
-                        <select asp-for="Manager_Id" class ="form-control" asp-items="ViewBag.Manager_Id"></select>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="Department_Id" class="control-label"></label>
-                        <select asp-for="Department_Id" class ="form-control" asp-items="ViewBag.Department_Id"></select>
-                    </div>
-                    <div class="form-group">
-                        <input type="submit" value="Create" class="btn btn-primary" />
-                    </div>
-                </form>
-            </div>
-        </div>
-    `;
-    $("#ModalEmployeeTitle").text("Delete");
-    $("#ModalBody").html(text);
-};
 
 $(document).ready(function () {
     $('.CreateBtn').click(function () {
