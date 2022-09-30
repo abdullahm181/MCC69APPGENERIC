@@ -239,57 +239,79 @@ async function Detail(id) {
     });
     let text = "";
     text = `
-        <dl class="row">
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.FirstName)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.FirstName)
-            </dd>
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.LastName)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.LastName)
-            </dd>
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.Email)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.Email)
-            </dd>
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.PhoneNumber)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.PhoneNumber)
-            </dd>
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.HireDate)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.HireDate)
-            </dd>
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.Salary)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.Salary)
-            </dd>
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.Jobs)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.Jobs.Id)
-            </dd>
-
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.Departments)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.Departments.Id)
-            </dd>
-        </dl>
+        <div class="row">
+            <div class="col">
+                FirstName
+            </div>
+            <div class="col">
+                ${employeeDetail.firstName}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                LastName
+            </div>
+            <div class="col">
+               ${employeeDetail.lastName}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                Email
+            </div>
+            <div class="col">
+               ${employeeDetail.email}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                PhoneNumber
+            </div>
+            <div class="col">
+              ${employeeDetail.phoneNumber}
+            </div>
+        </div>
+       <div class="row">
+            <div class="col">
+                HireDate
+            </div>
+            <div class="col">
+              ${employeeDetail.hireDate}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                Salary
+            </div>
+            <div class="col">
+              ${employeeDetail.salary}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                Jobs
+            </div>
+            <div class="col">
+              ${employeeDetail.jobs.jobTitle}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                Departments
+            </div>
+            <div class="col">
+                ${employeeDetail.departments.name}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                Manager_Id
+            </div>
+            <div class="col">
+                ${employeeDetail.manager_Id}
+            </div>
+        </div>
+    
     `;
     $("#ModalEmployeeTitle").text("Details");
     $("#ModalBody").html(text);
