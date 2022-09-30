@@ -1,66 +1,109 @@
 ﻿
 
 
-function Create() {
+async function Create() {
     //console.log("Test masuk create")
 
     let text = "";
     text = `
-        <div class="row">
-            <div class="col">
-                <form >
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    <div class="form-group">
-                        <label asp-for="FirstName" class="control-label"></label>
-                        <input asp-for="FirstName" class="form-control" />
-                        <span asp-validation-for="FirstName" class="text-danger"></span>
+        <div class="addselection">
+            <div class="row">
+                        <div class="col">
+                            <form id="Create" method="POST" action="javascript:void(0);">
+                                <div  class="text-danger"></div>
+                                <input type="hidden" asp-for="Id" />
+                                <div class="form-group">
+                                    <label class="control-label">FirstName</label>
+                                    <input class="form-control" name="FirstName" />
+                                   
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label">LastName</label>
+                                    <input class="form-control" name="LastName"/>
+                                   
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label">Email</label>
+                                    <input class="form-control" name="Email"/>
+                                   
+                                </div>
+                                <div class="form-group">
+                                    <label  class="control-label">PhoneNumber</label>
+                                    <input  class="form-control" name="PhoneNumber />
+                                    
+                                </div>
+                                <div class="form-group">
+                                    <label  class="control-label">HireDate</label>
+                                    <input  class="form-control" name="HireDate" />
+                                    
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label">Salary</label>
+                                    <input  class="form-control" name="Salary" />
+                                   
+                                </div>
+                                <div class="form-group">
+                                    <label  class="control-label">Job_Id</label>
+                                    <select  class="form-control" name="Job_Id" id="JobCreate"></select
+                                </div>
+                                <div class="form-group">
+                                    <label  class="control-label">Manager_Id</label>
+                                    <select  class="form-control"  name="Manager_Id" id="EmployeesCreate"></select>
+                                    
+                                </div>
+                                <div class="form-group">
+                                    <label  class="control-label">Department_Id</label>
+                                    <select  class="form-control"  name="Department_Id" id="DepartmentsCreate"></select>
+                                    
+                                </div>
+                                <div class="form-group">
+                                    <input type="submit" value="Save" class="btn btn-primary" />
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label asp-for="LastName" class="control-label"></label>
-                        <input asp-for="LastName" class="form-control" />
-                        <span asp-validation-for="LastName" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="Email" class="control-label"></label>
-                        <input asp-for="Email" class="form-control" />
-                        <span asp-validation-for="Email" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="PhoneNumber" class="control-label"></label>
-                        <input asp-for="PhoneNumber" class="form-control" />
-                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="HireDate" class="control-label"></label>
-                        <input asp-for="HireDate" class="form-control" />
-                        <span asp-validation-for="HireDate" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="Salary" class="control-label"></label>
-                        <input asp-for="Salary" class="form-control" />
-                        <span asp-validation-for="Salary" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="Job_Id" class="control-label"></label>
-                        <select asp-for="Job_Id" class ="form-control" asp-items="ViewBag.Job_Id"></select>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="Manager_Id" class="control-label"></label>
-                        <select asp-for="Manager_Id" class ="form-control" asp-items="ViewBag.Manager_Id"></select>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="Department_Id" class="control-label"></label>
-                        <select asp-for="Department_Id" class ="form-control" asp-items="ViewBag.Department_Id"></select>
-                    </div>
-                    <div class="form-group">
-                        <input type="submit" value="Create" class="btn btn-primary" />
-                    </div>
-                </form>
-            </div>
-        </div>
+        </div
     `;
     $("#ModalEmployeeTitle").text("Create");
     $("#ModalBody").html(text);
+
+    const Jobs = await GetAll("Jobs");
+    $("#JobCreate").empty()
+    $.each(Jobs, function () {
+        $("#JobCreate").append($("<option />").val(this.id).text(this.jobTitle));
+
+    });
+    const Employees = await GetAll("Employees");
+    $("#EmployeesCreate").empty()
+    $.each(Employees, function () {
+        $("#EmployeesCreate").append($("<option />").val(this.id).text(`${this.firstName} ${this.lastName}`));
+
+    });
+    const Departments = await GetAll("Departments");
+    $("#DepartmentsCreate").empty()
+    $.each(Departments, function () {
+        $("#DepartmentsCreate").append($("<option />").val(this.id).text(this.name));
+
+    });
+    $("#Create").on("submit", async function (event) {
+        var data = {};
+        data["Id"] = 0;
+        $('#Create').serializeArray().map(function (x) { data[x.name] = x.value; });
+        const resultPost = await Post("Employees", data);
+        console.log(data);
+        console.log(resultPost);
+        if (resultPost == 200) {
+            $('#tEmployees').DataTable().ajax.reload();
+            $('#ModalData').modal('hide');
+        }
+        swal(
+            'Success',
+            'Data Telah Ditambahkan',
+            'success'
+        )
+        event.preventDefault();
+
+    });
 };
 
 async function Edit(id) {
@@ -73,54 +116,54 @@ async function Edit(id) {
         <div class="addselection">
             <div class="row">
                         <div class="col">
-                            <form id="Edit">
-                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <form id="Edit" method="POST" action="javascript:void(0);">
+                                <div  class="text-danger"></div>
                                 <input type="hidden" asp-for="Id" />
                                 <div class="form-group">
-                                    <label asp-for="FirstName" class="control-label"></label>
-                                    <input asp-for="FirstName" class="form-control" name="FirstName" value="${employeeDetail.firstName}" />
-                                    <span asp-validation-for="FirstName" class="text-danger"></span>
-                                </div>
-                                <div class="form-group">
-                                    <label asp-for="LastName" class="control-label"></label>
-                                    <input asp-for="LastName" class="form-control" name="LastName" value="${employeeDetail.lastName}"/>
-                                    <span asp-validation-for="LastName" class="text-danger"></span>
-                                </div>
-                                <div class="form-group">
-                                    <label asp-for="Email" class="control-label"></label>
-                                    <input asp-for="Email" class="form-control" name="Email" value="${employeeDetail.email}"/>
-                                    <span asp-validation-for="Email" class="text-danger"></span>
-                                </div>
-                                <div class="form-group">
-                                    <label asp-for="PhoneNumber" class="control-label"></label>
-                                    <input asp-for="PhoneNumber" class="form-control" name="PhoneNumber" value="${employeeDetail.phoneNumber}"/>
-                                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-                                </div>
-                                <div class="form-group">
-                                    <label asp-for="HireDate" class="control-label"></label>
-                                    <input asp-for="HireDate" class="form-control" name="HireDate" value="${employeeDetail.hireDate}"/>
-                                    <span asp-validation-for="HireDate" class="text-danger"></span>
-                                </div>
-                                <div class="form-group">
-                                    <label asp-for="Salary" class="control-label"></label>
-                                    <input asp-for="Salary" class="form-control" name="Salary" value="${employeeDetail.salary}"/>
-                                    <span asp-validation-for="Salary" class="text-danger"></span>
-                                </div>
-                                <div class="form-group">
-                                    <label asp-for="Job_Id" class="control-label"></label>
+                                    <label  class="control-label">FirstName</label>
+                                    <input class="form-control" name="FirstName" value="${employeeDetail.firstName}" />
                                     
-                                    <select asp-for="Job_Id" class="form-control" asp-items="ViewBag.Job_Id" name="Job_Id" id="JobEdit"></select>
-                                    <span asp-validation-for="Job_Id" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
-                                    <label asp-for="Manager_Id" class="control-label"></label>
-                                    <select asp-for="Manager_Id" class="form-control" asp-items="ViewBag.Manager_Id" name="Manager_Id" id="EmployeesEdit"></select>
-                                    <span asp-validation-for="Manager_Id" class="text-danger"></span>
+                                    <label  class="control-label">LastName</label>
+                                    <input " class="form-control" name="LastName" value="${employeeDetail.lastName}"/>
+                                   
                                 </div>
                                 <div class="form-group">
-                                    <label asp-for="Department_Id" class="control-label"></label>
-                                    <select asp-for="Department_Id" class="form-control" asp-items="ViewBag.Department_Id" name="Department_Id" id="DepartmentsEdit"></select>
-                                    <span asp-validation-for="Department_Id" class="text-danger"></span>
+                                    <label  class="control-label">Email</label>
+                                    <input  class="form-control" name="Email" value="${employeeDetail.email}"/>
+                                    
+                                </div>
+                                <div class="form-group">
+                                    <label  class="control-label">PhoneNumber</label>
+                                    <input  class="form-control" name="PhoneNumber" value="${employeeDetail.phoneNumber}"/>
+                                    
+                                </div>
+                                <div class="form-group">
+                                    <label  class="control-label">HireDate</label>
+                                    <input class="form-control" name="HireDate" value="${employeeDetail.hireDate}"/>
+                                    
+                                </div>
+                                <div class="form-group">
+                                    <label  class="control-label">Salary</label>
+                                    <input class="form-control" name="Salary" value="${employeeDetail.salary}"/>
+                                    
+                                </div>
+                                <div class="form-group">
+                                    <label  class="control-label">Job_Id</label>
+                                    
+                                    <select class="form-control" name="Job_Id" id="JobEdit"></select>
+                                    
+                                </div>
+                                <div class="form-group">
+                                    <label  class="control-label">Manager_Id</label>
+                                    <select  lass="form-control"  name="Manager_Id" id="EmployeesEdit"></select>
+                                    
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label">Department_Id</label>
+                                    <select class="form-control"  name="Department_Id" id="DepartmentsEdit"></select>
+                                    
                                 </div>
                                 <div class="form-group">
                                     <input type="submit" value="Save" class="btn btn-primary" />
@@ -167,12 +210,29 @@ async function Edit(id) {
         }
 
     });
-    var data = {};
-    $('#Edit').serializeArray().map(function (x) { data[x.name] = x.value; });
-    console.log(data);
+    $("#Edit").on("submit", async function (event) {
+        var data = {};
+        data["Id"] = employeeDetail.id;
+        $('#Edit').serializeArray().map(function (x) { data[x.name] = x.value; });
+        const resultPut = await Put("Employees", data);
+        console.log(data);
+        console.log(resultPut);
+        if (resultPut == 200) {
+            $('#tEmployees').DataTable().ajax.reload();
+            $('#ModalData').modal('hide');
+        }
+        swal(
+            'Success',
+            'Data Telah Berubah',
+            'success'
+        )
+        event.preventDefault();
+
+    });
+   
     
 };
-function Detail(id) {
+async function Detail(id) {
     //console.log("Test masuk create")
 
     let text = "";
@@ -233,14 +293,14 @@ function Detail(id) {
     $("#ModalBody").html(text);
 };
 
-function Delete(id) {
+async function Delete(id) {
     //console.log(id);
 
     let text = "";
     text = `
         <div class="row">
             <div class="col">
-                <form asp-action="Create">
+                <form method="POST" action="javascript:void(0);">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     <div class="form-group">
                         <label asp-for="FirstName" class="control-label"></label>
@@ -373,12 +433,13 @@ $(document).ready(function () {
                     return `
                         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ModalData" onclick="Edit('${row.id}')">Edit</button>
                         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ModalData" onclick="Detail('${row.id}')">Detail</button>
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ModalData" onclick="Create('${row.id}')">Delete</button>
+                        <button type="button" class="btn btn-primary" onclick="confirmDelete('tEmployees','Employees',${row.id})">Delete</button>
                     `;
                 }
             }
         ]
     });
+    
 
     // Example starter JavaScript for disabling form submissions if there are invalid fields
     (function () {
@@ -413,5 +474,5 @@ $(document).ready(function () {
                 )
             }
         });
-    })()
+    })();
 });

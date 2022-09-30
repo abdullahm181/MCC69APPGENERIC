@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace MCC69APP.Controllers
 {
-    
+    [Authorize]
     public class EmployeesController : BaseController<Employees, EmployeesRepository>
     {
         DepartmentsRepository departmentsRepository;

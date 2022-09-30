@@ -17,6 +17,7 @@ using MCC69APP.Repositories.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using System.Net;
 
 namespace MCC69APP
 {
@@ -34,6 +35,7 @@ namespace MCC69APP
         {
             services.AddSession(options => {
                 options.IdleTimeout = TimeSpan.FromMinutes(5);//You can set Time   
+
             });
             services.AddHttpContextAccessor();
             services.AddAuthentication(x =>
@@ -57,6 +59,7 @@ namespace MCC69APP
                      ClockSkew = TimeSpan.Zero
                  };
 
+
              });
 
             services.AddScoped<LevelRepository>();
@@ -74,7 +77,9 @@ namespace MCC69APP
             //services.AddDbContext<MyContext>(options => options.UseSqlServer(Configuration.GetConnectionString("connection")));
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddDistributedMemoryCache();
-            
+            services.AddControllers().AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+            );
             //services.AddMvc();
         }
 
@@ -107,6 +112,26 @@ namespace MCC69APP
                  }
                  await next();
              });*/
+            app.UseStatusCodePages(async context =>
+            {
+                var request = context.HttpContext.Request;
+                var response = context.HttpContext.Response;
+
+                // Console.WriteLine("STATUS CODE {0}", response.StatusCode);
+
+                if (response.StatusCode.Equals((int)HttpStatusCode.Forbidden))
+                {
+                    response.Redirect("../home/forbidden");
+                }
+                else if (response.StatusCode.Equals((int)HttpStatusCode.Unauthorized))
+                {
+                    response.Redirect("../home/Unauth");
+                }
+                else if (response.StatusCode.Equals((int)HttpStatusCode.NotFound))
+                {
+                    response.Redirect("../home/NotFound404");
+                }
+            });
             app.Use(async (HttpContext context, Func<Task> next) =>
             {
                 var token = context.Session.GetString("Token");
@@ -118,6 +143,7 @@ namespace MCC69APP
                 await next();
                 
             });
+           
             app.UseAuthentication();
             
             app.UseAuthorization();
