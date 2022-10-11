@@ -23,13 +23,8 @@ namespace MCC69APP.Controllers
         }
         public IActionResult Index()
         {
-            var countries = GetAll();
-
-            if (countries == Enumerable.Empty<Countries>())
-            {
-                ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
-            }
-            return View(countries);
+            
+            return View();
         }
         
         /*HttpAPi<Countries> httpAPI;

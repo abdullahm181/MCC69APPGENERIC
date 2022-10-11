@@ -1,7 +1,35 @@
-﻿@using Microsoft.AspNetCore.Http;
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    var token = @HttpContextAccessor.HttpContext.Session.GetString("Token");
+    if (token == null)
+    {
+        token = "Logout";
+    }
+    //
+
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+        //session end
+        
+        let Token = "";
+        Token = Token + "@token";
+        //console.log(Token);
+        //console.log(window.location.pathname);
+        if (window.location.pathname != "/account/register" && window.location.pathname != "/account") {
+            if (Token == "Logout") {
+                SessionEnd();
+            }
+        }
+
+        function SessionEnd() {
+            console.log("masuk logout");
+            window.location = "/Account/Logout";
+        }
+    </script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>AdminLTE 3 | Dashboard</title>
@@ -245,7 +273,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="ModalEmployeeTitle">Modal title</h5>
+                    <h5 class="modal-title" id="ModalTitle">Modal title</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>

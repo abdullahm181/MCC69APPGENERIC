@@ -58,8 +58,6 @@ namespace MCC69APP
                      IssuerSigningKey = new SymmetricSecurityKey(Key),
                      ClockSkew = TimeSpan.Zero
                  };
-
-
              });
 
             services.AddScoped<LevelRepository>();

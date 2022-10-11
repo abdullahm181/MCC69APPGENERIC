@@ -1,41 +1,30 @@
 ﻿@model IEnumerable<MCC69APP.Models.Departments>
 
-@{
-    ViewData["Title"] = "Index";
-}
-
-<h1>Index</h1>
+@{ ViewData["Title"] = "Index"; }
 
 <p>
-    <a asp-action="Create">Create New</a>
+    @*<a asp-action="Create">Create New</a>*@
+    <a class="btn btn-primary" data-toggle="modal" data-target="#ModalData" onclick="Create()">Create New</a>
 </p>
-<table class="table">
-    <thead>
+
+
+<table class="table table-striped " id="tDepartments">
+    <thead class="table-dark">
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Locations)
-            </th>
-            <th></th>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col">Location</th>
+            <th scope="col">Actions</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Locations.StreetAddress)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
     </tbody>
 </table>
+
+
+
+@section Scripts
+{
+
+    <script src="~/js/Departments/index.js"></script>
+}
